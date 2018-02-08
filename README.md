@@ -5,7 +5,7 @@ Pas vraiment de projet, mais commencer à jouer avec cette carte couplée avec u
 La partie mic array étant prévue pour remplacer le kinect utilisé par le bloc Listen de mon Home Butler (aka SARAH @JpEncausse).
 
 LEDS
-- prise ne main du everloop
+- prise en main du everloop
 
 MICS
 - utilisation du beam channel (qualité d'enregistrement bluffante !)
