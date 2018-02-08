@@ -30,7 +30,7 @@ void SpeechStarted(Leds* leds)
 	x.red = 50;
 
 	leds->Set(x);
-	std::this_thread::sleep_for(std::chrono::milliseconds(250));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	leds->Reset();
 }
 
