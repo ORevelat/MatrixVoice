@@ -1,3 +1,4 @@
+#pragma once
 
 #include <matrix_hal/wishbone_bus.h>
 #include <matrix_hal/microphone_array.h>

@@ -52,6 +52,9 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "deque": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "cassert": "cpp",
+        "sstream": "cpp",
+        "bitset": "cpp"
     }
 }

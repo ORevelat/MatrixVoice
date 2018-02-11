@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <vector>
 
+/* from voice driver but fix number of leds */
+
 namespace matrix_hal {
 
 class LedValue 

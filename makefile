@@ -11,7 +11,7 @@ CXX = g++
 PATH_INC = -I/usr/include -I/usr/local/include
 PATH_LIB = -L/usr/local/lib -L./lib
 
-LIBS = -lwiringPi -lmatrix_creator_hal -lsnowboy-detect -lcblas -lpthread
+LIBS = -lwiringPi -lmatrix_creator_hal -lsnowboy-detect -lcblas -lpthread -lcurl
 
 ifeq ($(DEBUG),yes)
 	CFLAGS = -g -W -Wall
@@ -21,7 +21,10 @@ else
 	CXXFLAGS = -W -Wall
 endif
 
-all: leds mics
+all: listen
+
+listen: listen.o snowboy_wrapper.o cencode.o
+	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
 
 mics: mics.o snowboy_wrapper.o
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
@@ -29,11 +32,17 @@ mics: mics.o snowboy_wrapper.o
 leds: leds.o 
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
 
+listen.o: listen.cpp listen_leds.h listen_mics.h listen_circularbuffer.h listen_httpsend.h
+	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
+
 %.o: %.cpp
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
 %.o: %.cc
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
+%.o: %.c
+	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
+
 clean:
-	rm -rf *.o *.bak mics leds
+	rm -rf *.o *.bak mics leds listen
