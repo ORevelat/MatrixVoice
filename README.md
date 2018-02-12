@@ -13,4 +13,17 @@ MICS
 - algo basé sur l'énergie moyenne pour détecter la fin de la parole
  > étonnamment solution simple mais assez robuste même avec du bruit ambiant voir de la musique (HP diffusant du Hysteria@Muse à même pas 50 cm et niveau sonore quasiment identique à celui de ma voix lors des tests) !
  
- 
+
+Update 2018 02 10
+
+LISTEN - brique remplacant le module Listen C# (ou python) de SARAH v5
+- clean du code (basé sur leds & mics)
+- ajustement de la détection de fin de phrase
+- leds rouges quand le mote clé est détecté
+- leds vertes à la fin de la phrase
+- curl pour l'envoi du buffer encodé en base 64 vers le coeur de SARAH v5 (node-red)
+
+SPEAK (python) - brique remplacant le module Speak C# de SARAH v5
+- utilisation de svox pico tts (offline)
+- speak.py pour un petit serveur http écoutant les requêtes GET avec un param speak - chaine envoyée directement à tts.sh
+- tts.sh pour encapsuler la ligne de commande pico
