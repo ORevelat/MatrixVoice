@@ -3,10 +3,20 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <fstream>
+#include <iterator>
+#include <algorithm>
+#include <vector>
 
 #include <curl/curl.h>
 
-#include "cencode.h"
+#include "base64.h"
+
+struct WriteThis
+{
+  const char *readptr;
+  size_t sizeleft;
+};
 
 class ListenHTTPSend
 {
@@ -29,11 +39,21 @@ class ListenHTTPSend
 		std::ostringstream url;
 		url << "http://" << _url << ":" << _port << "/sarah/listen";
 
-		std::string payload = build_postfield(buffer, len);
-		curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		std::string encoded = base64_encode((char unsigned const*)&buffer[0], len * sizeof(int16_t));
+		encoded = "buffer=" + std::string(curl_easy_escape(curl , encoded.data(), encoded.size()));
 
+		struct WriteThis wt;
+
+		wt.readptr = &encoded[0];
+		wt.sizeleft = encoded.size();
+		
+	    curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
+		curl_easy_setopt(curl, CURLOPT_POST, 1L);
+		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+		curl_easy_setopt(curl, CURLOPT_READDATA, &wt);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)wt.sizeleft);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		
 		CURLcode res = curl_easy_perform(curl);
 		if (res != CURLE_OK) {
 			std::cerr << "curl_easy_perform() failed: " <<  curl_easy_strerror(res) << std::endl;
@@ -48,27 +68,23 @@ class ListenHTTPSend
 
 	private:
 	static inline size_t write_data(void *, size_t size, size_t nmemb, void *) { return size * nmemb; }
-
-	std::string build_postfield(int16_t const* buffer, size_t len)
+	static inline size_t read_callback(void *dest, size_t size, size_t nmemb, void *userp)
 	{
-		std::ostringstream postdata;
+		struct WriteThis *wt = (struct WriteThis *)userp;
+		size_t buffer_size = size*nmemb;
 
-		std::vector<char> output(4 * len * sizeof(uint16_t));
+		if (wt->sizeleft) {
+			size_t copy_this_much = wt->sizeleft;
+			if(copy_this_much > buffer_size)
+				copy_this_much = buffer_size;
+			std::memcpy(dest, wt->readptr, copy_this_much);
 
-		base64_encodestate s;
-		base64_init_encodestate(&s);
+			wt->readptr += copy_this_much;
+			wt->sizeleft -= copy_this_much;
+			return copy_this_much;
+		}
 
-		int encode_len = base64_encode_block((char const*)&buffer[0], len * sizeof(uint16_t), output.data(), &s);
-		encode_len += base64_encode_blockend(output.data() + encode_len, &s);
-
-		postdata << "len=" << encode_len << "&";
-		postdata << "buffer=";
-		for(int i=0; i<encode_len; i++)
-			postdata << output[i];
-
-		//std::cerr << postdata.str() << std::endl;
-
-		return postdata.str();
+		return 0;
 	}
 
 	private:

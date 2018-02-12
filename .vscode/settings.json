@@ -55,6 +55,8 @@
         "string": "cpp",
         "cassert": "cpp",
         "sstream": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "algorithm": "cpp",
+        "iterator": "cpp"
     }
 }
