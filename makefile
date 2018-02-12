@@ -23,13 +23,7 @@ endif
 
 all: listen
 
-listen: listen.o snowboy_wrapper.o cencode.o
-	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
-
-mics: mics.o snowboy_wrapper.o
-	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
-
-leds: leds.o 
+listen: listen.o snowboy_wrapper.o
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
 
 listen.o: listen.cpp listen_leds.h listen_mics.h listen_circularbuffer.h listen_httpsend.h
@@ -45,4 +39,4 @@ listen.o: listen.cpp listen_leds.h listen_mics.h listen_circularbuffer.h listen_
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
 clean:
-	rm -rf *.o *.bak mics leds listen
+	rm -rf a.out *.o *.bak listen
