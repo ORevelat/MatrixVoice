@@ -15,6 +15,9 @@ namespace sarah_matrix
 		void run(std::string in);
 
 	private:
+		void loop_leds(bool*);
+
+	private:
 		leds* _leds;
 	};
 
