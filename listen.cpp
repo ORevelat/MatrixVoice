@@ -1,110 +1,136 @@
-#include <cassert>
-#include <csignal>
-#include <unistd.h>
-#include <cstring>
-#include <fstream>
 #include <iostream>
+#include <string>
+#include <cstring>
 
-#include <matrix_hal/wishbone_bus.h>
+#include <glog/logging.h>
 
-#include "listen_leds.h"
-#include "listen_mics.h"
-#include "listen_httpsend.h"
+#include "listen.h"
+
+#include "matrix_mics.h"
+#include "matrix_leds.h"
+
+#include "snowboy_wrapper.h"
 
 #define SILENCE_COUNT	3 * WINDOW_SIZE / 256
 // 10 sec maximum
 #define MAX_COUNT		10000 / (WINDOW_SIZE / 256)
 
-#include "snowboy_wrapper.h"
-
-namespace hal = matrix_hal;
-
-bool exitRequested = false;
-
-void SignalHandler(int)
+namespace sarah_matrix
 {
-  exitRequested = true;
-}
 
-int main(int, const char**)
-{
-	// Configures signal handling for ctrl+c
-	struct sigaction sig_int_handler;
-	sig_int_handler.sa_handler = SignalHandler;
-	sigemptyset(&sig_int_handler.sa_mask);
-	sig_int_handler.sa_flags = 0;
-	sigaction(SIGINT, &sig_int_handler, NULL);
+	// singleton initialization
+	listen* listen::_instance = 0;
 
-	std::cout << "Initializing ..." << std::endl;
-
-	hal::WishboneBus bus;
-	bus.SpiInit();
-
-	// initialize mics & leds
-	ListenLeds leds(bus);
-	ListenMics mics(bus);
-
-	ListenHTTPSend http("192.168.254.220", 1880);
-
-	// Initializes Snowboy detector.
-	Snowboy::Model model;
-	model.filename = "resources/sarah.pmdl";
-	model.sensitivity = 0.38;
-
-	Snowboy detector("resources/common.res", model, 1.0);
-
-	std::cout << "Running ..." << std::endl;
-
-	int64_t avg_for_hotword = 0;
-	uint16_t tick_after_hotword = 0;
-	uint16_t total_tick_after_hotword = 0;
-
-	// up to 10 seconds of sound
-	int16_t	record_buffer[10000 * (WINDOW_SIZE / 256)];
-	size_t	record_len = 0;
-
-	while (!exitRequested) {
-		int64_t wnd_avg = mics.Read();
-
-		int result = detector.RunDetection(mics.Last(), NUMBER_SAMPLE);
-		if (result > 0) {
-			avg_for_hotword = wnd_avg;
-			tick_after_hotword = 0;
-			total_tick_after_hotword = 0;
-			record_len = 0;
-
-			leds.On(ListenLeds::red, 500);
-		}
-
+	listen* listen::getInstance()
+	{
+		if (_instance == 0)
+			_instance = new listen();
+		return _instance;
+	}
 	
-		if (avg_for_hotword > 0) {
-			// copy to keep raw buffer
-			std::memcpy(record_buffer + record_len, mics.Last(), NUMBER_SAMPLE * sizeof(int16_t));
-			record_len += NUMBER_SAMPLE;
-
-			total_tick_after_hotword++;
-		 	if (wnd_avg < avg_for_hotword)
-		 		tick_after_hotword ++;
-		 	else
-		 		tick_after_hotword = 0;
-		}
-
-		if ((tick_after_hotword > SILENCE_COUNT) || (total_tick_after_hotword > MAX_COUNT))
+	void listen::delInstance()
+	{
+		if (_instance)
 		{
-		 	avg_for_hotword = 0;
-		 	tick_after_hotword = 0;
-			total_tick_after_hotword = 0;
-
-			leds.On(ListenLeds::green);
-
-			http.Send(record_buffer, record_len);
+			delete _instance;
+			_instance = 0;
 		}
 	}
 
-	std::cout << "Cleaning ..." << std::endl;
+	listen::listen()
+		: _exit(false), _thread(0)
+	{
+	}
 
-	bus.SpiClose();
+	listen::~listen()
+	{
+		stop();
+	}
 
-	std::cout << "Done" << std::endl;
-	return 0;
+	void listen::start(void* m, void* l)
+	{
+		_exit = false;
+		_thread = new std::thread(&listen::run, this, m, l);
+	}
+
+	void listen::stop()
+	{
+		_exit = true;
+	}
+
+	void listen::wait()
+	{
+		if(_thread)
+		{
+			_thread->join();
+			delete _thread;
+			_thread = 0;
+		}
+	}
+
+	void listen::run(void* m, void* l)
+	{
+		LOG(INFO) << "Initializing listening ...";
+
+		// Initializes Snowboy detector.
+		Snowboy::Model model;
+		model.filename = "resources/sarah.pmdl";
+		model.sensitivity = 0.38;
+
+		Snowboy detector("resources/common.res", model, 1.0);
+
+		LOG(INFO) << "Starting listening ...";
+
+		mics* _mics = reinterpret_cast<mics*>(m);
+		leds* _leds = reinterpret_cast<leds*>(l);
+
+		int64_t avg_for_hotword = 0;
+		uint16_t tick_after_hotword = 0;
+		uint16_t total_tick_after_hotword = 0;
+
+		// up to 10 seconds of sound
+		int16_t	record_buffer[10000 * (WINDOW_SIZE / 256)];
+		size_t	record_len = 0;
+
+		while (!_exit)
+		{
+			int64_t wnd_avg = _mics->read();
+
+			int result = detector.RunDetection(_mics->last(), NUMBER_SAMPLE);
+			if (result > 0) {
+				avg_for_hotword = wnd_avg;
+				tick_after_hotword = 0;
+				total_tick_after_hotword = 0;
+				record_len = 0;
+
+				_leds->On(leds::red, 500);
+			}
+		
+			if (avg_for_hotword > 0) {
+				// copy to keep raw buffer
+				std::memcpy(record_buffer + record_len, _mics->last(), NUMBER_SAMPLE * sizeof(int16_t));
+				record_len += NUMBER_SAMPLE;
+
+				total_tick_after_hotword++;
+				if (wnd_avg < avg_for_hotword)
+					tick_after_hotword ++;
+				else
+					tick_after_hotword = 0;
+			}
+
+			if ((tick_after_hotword > SILENCE_COUNT) || (total_tick_after_hotword > MAX_COUNT))
+			{
+				avg_for_hotword = 0;
+				tick_after_hotword = 0;
+				total_tick_after_hotword = 0;
+
+				_leds->On(leds::green, 250);
+
+				//http.Send(record_buffer, record_len);
+			}
+		}
+		
+		LOG(INFO) << "Listening stopped";
+	}
+
 }

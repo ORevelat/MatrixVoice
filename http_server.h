@@ -13,8 +13,8 @@ namespace sarah_matrix
 		static http_server* getInstance();
 		static void delInstance();
 
-		void stop();
 		void start(const std::string&, uint16_t, std::function< void(std::string) > func);
+		void stop();
 		void wait();
 
 	private:

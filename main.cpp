@@ -8,19 +8,30 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
-#include "http_server.h"
-#include "speak.h"
+#include <matrix_hal/wishbone_bus.h>
 
-using namespace sarah_matrix;
+#include "main.h"
+
+#include "http_server.h"
+#include "matrix_leds.h"
+#include "matrix_mics.h"
+#include "speak.h"
+#include "listen.h"
 
 DEFINE_string(ip, "0.0.0.0", "What ip to bind on");
 DEFINE_int32(port, 1234, "What port to listen on");
+
+using namespace sarah_matrix;
 
 void SignalHandler(int)
 {
 	http_server* server = http_server::getInstance();
 	if (server)
 		server->stop();
+
+	listen* ls = listen::getInstance();
+	if (ls)
+		ls->stop();
 }
 
 int main(int argc, char** argv)
@@ -40,14 +51,33 @@ int main(int argc, char** argv)
 	sig_int_handler.sa_flags = 0;
 	sigaction(SIGINT, &sig_int_handler, NULL);
 
-	sarah_matrix::speak sp;
+	LOG(INFO) << "Initialising ...";
 
+	matrix_hal::WishboneBus bus;
+	bus.SpiInit();
+
+	leds voiceLeds(bus);
+	mics voiceMics(bus);
+
+	speak sp(&voiceLeds);
+	listen* ls = listen::getInstance();
 	http_server* server = http_server::getInstance();
-	server->start(FLAGS_ip, FLAGS_port, std::bind(&sarah_matrix::speak::run, &sp, std::placeholders::_1));
+
+	LOG(INFO) << "Initialise done";
+
+	server->start(FLAGS_ip, FLAGS_port, std::bind(&speak::run, &sp, std::placeholders::_1));
+	ls->start((void*)&voiceMics, (void*)&voiceLeds);
+
 	server->wait();
+	ls->wait();
+
+	LOG(INFO) << "Deinitialising ...";
 
 	http_server::delInstance();
+	listen::delInstance();
 
     gflags::ShutDownCommandLineFlags();
+
+	LOG(INFO) << "Exit";
     return 0;
 }

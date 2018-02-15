@@ -40,17 +40,17 @@ namespace sarah_matrix
 		stop();
 	}
 
+	void http_server::start(const std::string& ip, uint16_t port, std::function< void(std::string) > func)
+	{
+		_thread = new std::thread(&http_server::run, this, ip, port, func);
+	}
+
 	void http_server::stop()
 	{
 		using namespace httplib;
 
 		if (_http)
 			reinterpret_cast<Server*>(_http)->stop();
-	}
-
-	void http_server::start(const std::string& ip, uint16_t port, std::function< void(std::string) > func)
-	{
-		_thread = new std::thread(&http_server::run, this, ip, port, func);
 	}
 
 	void http_server::wait()

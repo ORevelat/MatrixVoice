@@ -23,7 +23,7 @@ endif
 
 all: sarah
 
-sarah: main.o http_server.o speak.o
+sarah: main.o http_server.o speak.o listen.o matrix_leds.o matrix_mics.o snowboy_wrapper.o
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
 
 listen: listen.o snowboy_wrapper.o
@@ -32,13 +32,13 @@ listen: listen.o snowboy_wrapper.o
 listen.o: listen.cpp listen_leds.h listen_mics.h listen_circularbuffer.h listen_httpsend.h
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
-%.o: %.cpp
+%.o: %.cpp %.h
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
-%.o: %.cc
+%.o: %.cc  %.h
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
-%.o: %.c
+%.o: %.c  %.h
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
 clean:
