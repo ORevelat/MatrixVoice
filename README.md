@@ -27,3 +27,9 @@ SPEAK (python) - brique remplacant le module Speak C# de SARAH v5
 - utilisation de svox pico tts (offline)
 - speak.py pour un petit serveur http écoutant les requêtes GET avec un param speak - chaine envoyée directement à tts.sh
 - tts.sh pour encapsuler la ligne de commande pico
+
+
+Update 2018 02 13
+
+Démarrage du client SARAH complet en C++
+- ajout de la base d'un serveur http pour répondre aux requêtes GET /speak/.....

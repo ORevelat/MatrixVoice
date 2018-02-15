@@ -57,6 +57,15 @@
         "sstream": "cpp",
         "bitset": "cpp",
         "algorithm": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "ctime": "cpp",
+        "locale": "cpp",
+        "map": "cpp",
+        "regex": "cpp",
+        "xlocbuf": "cpp",
+        "xlocmes": "cpp",
+        "xlocmon": "cpp",
+        "xloctime": "cpp",
+        "xtree": "cpp"
     }
 }
