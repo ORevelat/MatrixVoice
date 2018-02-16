@@ -9,6 +9,8 @@
 #include "matrix_mics.h"
 #include "matrix_leds.h"
 
+#include "http_client.h"
+
 #include "snowboy_wrapper.h"
 
 #define SILENCE_COUNT	3 * WINDOW_SIZE / 256
@@ -47,10 +49,10 @@ namespace sarah_matrix
 		stop();
 	}
 
-	void listen::start(void* m, void* l)
+	void listen::start(void* m, void* l, void* h)
 	{
 		_exit = false;
-		_thread = new std::thread(&listen::run, this, m, l);
+		_thread = new std::thread(&listen::run, this, m, l, h);
 	}
 
 	void listen::stop()
@@ -68,7 +70,7 @@ namespace sarah_matrix
 		}
 	}
 
-	void listen::run(void* m, void* l)
+	void listen::run(void* m, void* l, void* h)
 	{
 		LOG(INFO) << "Initializing listening ...";
 
@@ -79,10 +81,11 @@ namespace sarah_matrix
 
 		Snowboy detector("resources/common.res", model, 1.0);
 
-		LOG(INFO) << "Starting listening ...";
+		LOG(INFO) << "Starting voice listening ...";
 
 		mics* _mics = reinterpret_cast<mics*>(m);
 		leds* _leds = reinterpret_cast<leds*>(l);
+		http_client* _http = reinterpret_cast<http_client*>(h);
 
 		int64_t avg_for_hotword = 0;
 		uint16_t tick_after_hotword = 0;
@@ -126,11 +129,11 @@ namespace sarah_matrix
 
 				_leds->On(leds::green, 250);
 
-				//http.Send(record_buffer, record_len);
+				_http->Send(record_buffer, record_len);
 			}
 		}
 		
-		LOG(INFO) << "Listening stopped";
+		LOG(INFO) << "Voice listening stopped";
 	}
 
 }

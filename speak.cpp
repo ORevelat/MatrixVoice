@@ -45,7 +45,7 @@ namespace sarah_matrix
 
 	void speak::run(std::string in)
 	{
-	   	LOG(INFO) << "Speak - " << in;
+	   	LOG(INFO) << "== speak - " << in;
 
 		bool stoploop = false;
 

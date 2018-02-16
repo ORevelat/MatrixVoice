@@ -12,7 +12,7 @@ namespace sarah_matrix
 		static listen* getInstance();
 		static void delInstance();
 
-		void start(void*, void*);
+		void start(void*, void*, void*);
 		void stop();
 		void wait();
 
@@ -20,13 +20,13 @@ namespace sarah_matrix
 		listen();
 		~listen();
 
-		void run(void*, void*);
+		void run(void*, void*, void*);
 	
 	private:
-		bool			    _exit;
-		std::thread*	    _thread;
+		bool			_exit;
+		std::thread*	_thread;
 		
-		static listen* _instance;
+		static listen*	_instance;
 	};
 
 }

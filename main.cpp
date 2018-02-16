@@ -13,6 +13,7 @@
 #include "main.h"
 
 #include "http_server.h"
+#include "http_client.h"
 #include "matrix_leds.h"
 #include "matrix_mics.h"
 #include "speak.h"
@@ -20,6 +21,9 @@
 
 DEFINE_string(ip, "0.0.0.0", "What ip to bind on");
 DEFINE_int32(port, 1234, "What port to listen on");
+
+DEFINE_string(remote_ip, "0.0.0.0", "What ip to use to send recorded audio");
+DEFINE_int32(remote_port, 1880, "What port to use to send recorded audio");
 
 using namespace sarah_matrix;
 
@@ -44,6 +48,8 @@ int main(int argc, char** argv)
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
+	LOG(INFO) << "Start";
+
 	// Configures signal handling for ctrl+c
 	struct sigaction sig_int_handler;
 	sig_int_handler.sa_handler = SignalHandler;
@@ -62,11 +68,12 @@ int main(int argc, char** argv)
 	speak sp(&voiceLeds);
 	listen* ls = listen::getInstance();
 	http_server* server = http_server::getInstance();
+	http_client client(FLAGS_remote_ip, FLAGS_remote_port);
 
 	LOG(INFO) << "Initialise done";
 
 	server->start(FLAGS_ip, FLAGS_port, std::bind(&speak::run, &sp, std::placeholders::_1));
-	ls->start((void*)&voiceMics, (void*)&voiceLeds);
+	ls->start((void*)&voiceMics, (void*)&voiceLeds, (void*)&client);
 
 	server->wait();
 	ls->wait();
