@@ -42,4 +42,9 @@ Client SARAH
 - http client pour envoyer l'enregistrement coté node-red (aka SARAH v5)
 - animation minimaliste mais sympa des leds du Matrix Voice sur détection du hotword, pendant la restitution de la synthèse
 - nettoyage du code / makefile
-
+- ligne de commande pour 
+    -ip xxx 'addresse du bind du serveur'
+    -port xxx 'le port associé'
+    -remote_ip 'addresse du node pour l'envoi du buffer audio capturé'
+    -remote_port 'le port associé'
+    
