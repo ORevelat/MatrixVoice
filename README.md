@@ -33,3 +33,13 @@ Update 2018 02 13
 
 Démarrage du client SARAH complet en C++
 - ajout de la base d'un serveur http pour répondre aux requêtes GET /speak/.....
+
+
+Update 2018 02 16
+
+Client SARAH
+- http serveur pour la partie speak
+- http client pour envoyer l'enregistrement coté node-red (aka SARAH v5)
+- animation minimaliste mais sympa des leds du Matrix Voice sur détection du hotword, pendant la restitution de la synthèse
+- nettoyage du code / makefile
+
