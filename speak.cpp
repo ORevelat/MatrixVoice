@@ -5,13 +5,15 @@
 #include <glog/logging.h>
 
 #include "speak.h"
+#include "listen.h"
+
 #include "matrix_leds.h"
 
 namespace sarah_matrix
 {
 
-	speak::speak(leds* l)
-		: _leds(l)
+	speak::speak(leds* l, listen* ls)
+		: _leds(l), _listen(ls)
 	{}
 
 	void speak::loop_leds(bool* stoploop)
@@ -47,6 +49,8 @@ namespace sarah_matrix
 	{
 	   	LOG(INFO) << "== speak - " << in;
 
+		_listen->speaking(true);
+
 		bool stoploop = false;
 
 		std::thread t(&speak::loop_leds, this, &stoploop);
@@ -60,6 +64,8 @@ namespace sarah_matrix
 
 		stoploop = true;
 		t.join();
+
+		_listen->speaking(false);
 	}
 
 }

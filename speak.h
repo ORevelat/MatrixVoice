@@ -7,10 +7,12 @@
 namespace sarah_matrix
 {
 
+	class listen;
+
 	class speak
 	{
 	public:
-		speak(leds*);
+		speak(leds*, listen*);
 
 		void run(std::string in);
 
@@ -18,7 +20,8 @@ namespace sarah_matrix
 		void loop_leds(bool*);
 
 	private:
-		leds* _leds;
+		leds* 	_leds;
+		listen*	_listen;
 	};
 
 }

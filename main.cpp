@@ -65,15 +65,15 @@ int main(int argc, char** argv)
 	leds voiceLeds(bus);
 	mics voiceMics(bus);
 
-	speak sp(&voiceLeds);
 	listen* ls = listen::getInstance();
+	speak sp(&voiceLeds, ls);
 	http_server* server = http_server::getInstance();
 	http_client client(FLAGS_remote_ip, FLAGS_remote_port);
 
 	LOG(INFO) << "Initialise done";
 
 	server->start(FLAGS_ip, FLAGS_port, std::bind(&speak::run, &sp, std::placeholders::_1));
-	ls->start((void*)&voiceMics, (void*)&voiceLeds, (void*)&client);
+	ls->start(&voiceMics, &voiceLeds, &client);
 
 	server->wait();
 	ls->wait();

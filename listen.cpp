@@ -10,6 +10,7 @@
 #include "matrix_leds.h"
 
 #include "http_client.h"
+#include "speak.h"
 
 #include "snowboy_wrapper.h"
 
@@ -40,7 +41,7 @@ namespace sarah_matrix
 	}
 
 	listen::listen()
-		: _exit(false), _thread(0)
+		: _exit(false), _thread(0), _mics(0), _leds(0), _http(0)
 	{
 	}
 
@@ -49,10 +50,14 @@ namespace sarah_matrix
 		stop();
 	}
 
-	void listen::start(void* m, void* l, void* h)
+	void listen::start(mics* m, leds* l, http_client* h)
 	{
+		_mics= m;
+		_leds = l;
+		_http = h;
+
 		_exit = false;
-		_thread = new std::thread(&listen::run, this, m, l, h);
+		_thread = new std::thread(&listen::run, this);
 	}
 
 	void listen::stop()
@@ -70,7 +75,7 @@ namespace sarah_matrix
 		}
 	}
 
-	void listen::run(void* m, void* l, void* h)
+	void listen::run()
 	{
 		LOG(INFO) << "Initializing listening ...";
 
@@ -83,9 +88,7 @@ namespace sarah_matrix
 
 		LOG(INFO) << "Starting voice listening ...";
 
-		mics* _mics = reinterpret_cast<mics*>(m);
-		leds* _leds = reinterpret_cast<leds*>(l);
-		http_client* _http = reinterpret_cast<http_client*>(h);
+		_speaking = false;
 
 		int64_t avg_for_hotword = 0;
 		uint16_t tick_after_hotword = 0;
@@ -99,14 +102,18 @@ namespace sarah_matrix
 		{
 			int64_t wnd_avg = _mics->read();
 
-			int result = detector.RunDetection(_mics->last(), NUMBER_SAMPLE);
-			if (result > 0) {
-				avg_for_hotword = wnd_avg;
-				tick_after_hotword = 0;
-				total_tick_after_hotword = 0;
-				record_len = 0;
+			if (!speaking() && (total_tick_after_hotword == 0))
+			{
+				// do not try to detect hotword if we are recording or speaking
+				int result = detector.RunDetection(_mics->last(), NUMBER_SAMPLE);
+				if (result > 0) {
+					avg_for_hotword = wnd_avg;
+					tick_after_hotword = 0;
+					total_tick_after_hotword = 0;
+					record_len = 0;
 
-				_leds->On(leds::red, 500);
+					_leds->On(leds::red, 500);
+				}
 			}
 		
 			if (avg_for_hotword > 0) {
