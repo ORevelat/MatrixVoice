@@ -1,8 +1,4 @@
 
-.PHONY: clean
-
-.SUFFIXES:
-
 DEBUG = yes
 
 CC = gcc
@@ -35,5 +31,12 @@ sarah: main.o http_server.o http_client.o speak.o listen.o matrix_leds.o matrix_
 %.o: %.c  %.h
 	$(CXX) -c $< $(PATH_INC) -o $@ $(CXXFLAGS)
 
+.PHONY: install
+install: sarah
+	mkdir -p ~/butler-client
+	cp $< ~/butler-client/sarah
+	cp -r resources ~/butler-client/resources
+
+.PHONY: clean
 clean:
 	rm -rf a.out *.o *.bak sarah
