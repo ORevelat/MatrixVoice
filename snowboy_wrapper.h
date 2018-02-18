@@ -2,18 +2,15 @@
 
 #include <cstdint>
 
-class Snowboy {
+class Snowboy
+{
  public:
-  struct Model {
-    const char* filename;
-    float sensitivity;
-  };
 
-  Snowboy(const char* resource_name, Model model, float audio_gain);
+  Snowboy(const char* resource_name, const char* model_name);
 
-  int SampleRate() const;
-  int NumChannels() const;
-  int BitsPerSample() const;
+  void SetSensitivity(const char* sensivity);
+  void SetAudioGain(float audio_gain);
+  void ApplyFrontend(bool apply_frontend);
 
   int RunDetection(const int16_t* data, int num_samples);
 

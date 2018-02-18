@@ -24,6 +24,8 @@
 // 10 sec maximum
 #define MAX_COUNT		10000 / (WINDOW_SIZE / 256)
 
+#define SNOWBOY_FRONTEND_ALGO	false
+
 namespace sarah_matrix
 {
 
@@ -87,11 +89,10 @@ namespace sarah_matrix
 		LOG(INFO) << "Initializing listening ...";
 
 		// Initializes Snowboy detector.
-		Snowboy::Model model;
-		model.filename = "resources/sarah.pmdl";
-		model.sensitivity = 0.34;
-
-		Snowboy detector("resources/common.res", model, 1.2);
+		Snowboy detector("resources/common.res", "resources/sarah.pmdl");
+		detector.SetSensitivity("0.30");
+		detector.SetAudioGain(1.0);
+		detector.ApplyFrontend(SNOWBOY_FRONTEND_ALGO);
 
 		LOG(INFO) << "Starting voice listening ...";
 
