@@ -25,6 +25,8 @@ DEFINE_int32(port, 1234, "What port to listen on");
 DEFINE_string(remote_ip, "0.0.0.0", "What ip to use to send recorded audio");
 DEFINE_int32(remote_port, 1880, "What port to use to send recorded audio");
 
+DEFINE_string(alsaout, "", "device to use for playing");
+
 using namespace sarah_matrix;
 
 void SignalHandler(int)
@@ -66,14 +68,14 @@ int main(int argc, char** argv)
 	mics voiceMics(bus);
 
 	listen* ls = listen::getInstance();
-	speak sp(&voiceLeds, ls);
+	speak sp(FLAGS_alsaout, &voiceLeds);
 	http_server* server = http_server::getInstance();
 	http_client client(FLAGS_remote_ip, FLAGS_remote_port);
 
 	LOG(INFO) << "Initialise done";
 
-	server->start(FLAGS_ip, FLAGS_port, std::bind(&speak::run, &sp, std::placeholders::_1));
-	ls->start(&voiceMics, &voiceLeds, &client);
+	server->start(FLAGS_ip, FLAGS_port, &sp);
+	ls->start(&voiceMics, &voiceLeds, &client, &sp);
 
 	server->wait();
 	ls->wait();

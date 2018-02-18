@@ -1,6 +1,12 @@
-#include <iostream>
 #include <string>
 #include <cstring>
+#include <fstream>
+#include <iostream>
+
+#ifdef RECORD_TOFILE
+#include <chrono>
+#include <ctime>
+#endif
 
 #include <glog/logging.h>
 
@@ -50,11 +56,12 @@ namespace sarah_matrix
 		stop();
 	}
 
-	void listen::start(mics* m, leds* l, http_client* h)
+	void listen::start(mics* m, leds* l, http_client* h, speak* sp)
 	{
 		_mics= m;
 		_leds = l;
 		_http = h;
+		_speak = sp;
 
 		_exit = false;
 		_thread = new std::thread(&listen::run, this);
@@ -82,13 +89,11 @@ namespace sarah_matrix
 		// Initializes Snowboy detector.
 		Snowboy::Model model;
 		model.filename = "resources/sarah.pmdl";
-		model.sensitivity = 0.38;
+		model.sensitivity = 0.34;
 
-		Snowboy detector("resources/common.res", model, 1.0);
+		Snowboy detector("resources/common.res", model, 1.2);
 
 		LOG(INFO) << "Starting voice listening ...";
-
-		_speaking = false;
 
 		int64_t avg_for_hotword = 0;
 		uint16_t tick_after_hotword = 0;
@@ -102,9 +107,9 @@ namespace sarah_matrix
 		{
 			int64_t wnd_avg = _mics->read();
 
-			if (!speaking() && (total_tick_after_hotword == 0))
+			// detect hotword only if we are not recording nor speaking
+			if (!_speak->is_speaking() && (total_tick_after_hotword == 0))
 			{
-				// do not try to detect hotword if we are recording or speaking
 				int result = detector.RunDetection(_mics->last(), NUMBER_SAMPLE);
 				if (result > 0) {
 					avg_for_hotword = wnd_avg;
@@ -113,6 +118,7 @@ namespace sarah_matrix
 					record_len = 0;
 
 					_leds->On(leds::red, 500);
+					_speak->sound();
 				}
 			}
 		
@@ -137,6 +143,14 @@ namespace sarah_matrix
 				_leds->On(leds::green, 250);
 
 				_http->Send(record_buffer, record_len);
+
+#ifdef RECORD_TOFILE
+				std::ofstream os;
+				std::string filename = "recorded.raw";
+    			os.open(filename, std::ofstream::binary);
+				os.write((const char *)record_buffer, record_len * sizeof(int16_t));
+				os.close();
+#endif
 			}
 		}
 		

@@ -14,6 +14,9 @@ namespace sarah_matrix
 		_buffer.resize(WINDOW_SIZE);
 	}
 
+	// read microphone beam 
+	// store to circular buffer
+	// and return average energy of the whole circular buffer
 	int64_t mics::read()
 	{
 		_mics.Read();
@@ -25,6 +28,7 @@ namespace sarah_matrix
 		return _buffer.average();
 	}
 
+		// return last read buffer
 	const int16_t* mics::last() const
 	{
 		return _buffer.lastsamples(NUMBER_SAMPLE);

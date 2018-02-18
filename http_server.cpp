@@ -40,9 +40,9 @@ namespace sarah_matrix
 		stop();
 	}
 
-	void http_server::start(const std::string& ip, uint16_t port, std::function< void(std::string) > func)
+	void http_server::start(const std::string& ip, uint16_t port, speak* sp)
 	{
-		_thread = new std::thread(&http_server::run, this, ip, port, func);
+		_thread = new std::thread(&http_server::run, this, ip, port, sp);
 	}
 
 	void http_server::stop()
@@ -63,17 +63,16 @@ namespace sarah_matrix
 		}
 	}
 
-	void http_server::run(const std::string& ip, uint16_t port, std::function< void(std::string) > func)
+	void http_server::run(const std::string& ip, uint16_t port, speak* sp)
 	{
 		using namespace httplib;
 
 		Server svr;
 
 		svr.get(R"(/speak/(.*))", [&](const Request& req, Response& res) {
-			auto speak = req.matches[1];
+			auto text = req.matches[1];
 
-			std::thread t(func, speak);
-			t.detach();
+			sp->tts(text);
 
 			res.set_content("OK", "text/plain");
 		});

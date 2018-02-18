@@ -9,6 +9,7 @@ namespace sarah_matrix
 	class mics;
 	class leds;
 	class http_client;
+	class speak;
 
 	class listen
 	{
@@ -16,12 +17,9 @@ namespace sarah_matrix
 		static listen* getInstance();
 		static void delInstance();
 
-		void start(mics*, leds*, http_client*);
+		void start(mics*, leds*, http_client*, speak*);
 		void stop();
 		void wait();
-
-		void speaking(bool b) { _speaking = b;}
-		bool speaking() const { return _speaking; }
 
    private:
 		listen();
@@ -36,9 +34,8 @@ namespace sarah_matrix
 		mics* 			_mics;
 		leds* 			_leds;
 		http_client*	_http;
+		speak*			_speak;
 		
-		bool			_speaking;
-
 		static listen*	_instance;
 	};
 

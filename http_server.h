@@ -7,13 +7,15 @@
 namespace sarah_matrix
 {
 
+	class speak;
+
 	class http_server
 	{
 	public:
 		static http_server* getInstance();
 		static void delInstance();
 
-		void start(const std::string&, uint16_t, std::function< void(std::string) > func);
+		void start(const std::string&, uint16_t, speak*);
 		void stop();
 		void wait();
 
@@ -21,7 +23,7 @@ namespace sarah_matrix
 		http_server();
 		~http_server();
 
-		void run(const std::string&, uint16_t, std::function< void(std::string) > func);
+		void run(const std::string&, uint16_t, speak*);
 		
 	private:
 		bool			    _exit;

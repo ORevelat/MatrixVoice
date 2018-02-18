@@ -18,12 +18,8 @@ namespace sarah_matrix
 	public:
 		mics(matrix_hal::WishboneBus&);
 
-		// read microphone beam 
-		// store to circular buffer
-		// and return average energy of the whole circular buffer
 		int64_t read();
 		
-		// return last read buffer
 		const int16_t* last() const;
 
 	private:

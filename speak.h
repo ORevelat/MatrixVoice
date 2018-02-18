@@ -2,26 +2,33 @@
 
 #include <string>
 
-#include "matrix_leds.h"
 
 namespace sarah_matrix
 {
-
-	class listen;
+	class leds;
 
 	class speak
 	{
 	public:
-		speak(leds*, listen*);
+		speak(const std::string&, leds*);
 
-		void run(std::string in);
+		void tts(const std::string&);
+		void sound(const std::string& w = "ding.wav");
+
+		bool is_speaking() const { return _isSpeaking; }
 
 	private:
-		void loop_leds(bool*);
+		void thread_tts(std::string);
+		void thread_sound(std::string);
+
+		void thread_leds(bool*);
 
 	private:
 		leds* 	_leds;
-		listen*	_listen;
+
+		std::string _alsaout;
+
+		bool	_isSpeaking;
 	};
 
 }
