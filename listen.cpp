@@ -90,7 +90,7 @@ namespace sarah_matrix
 
 		// Initializes Snowboy detector.
 		Snowboy detector("resources/common.res", "resources/sarah.pmdl");
-		detector.SetSensitivity("0.30");
+		detector.SetSensitivity("0.54");
 		detector.SetAudioGain(1.0);
 		detector.ApplyFrontend(SNOWBOY_FRONTEND_ALGO);
 
@@ -101,7 +101,7 @@ namespace sarah_matrix
 		uint16_t total_tick_after_hotword = 0;
 
 		// up to 10 seconds of sound
-		int16_t	record_buffer[10000 * (WINDOW_SIZE / 256)];
+		int16_t	record_buffer[(10000 + 1) * (WINDOW_SIZE / 256)];
 		size_t	record_len = 0;
 
 		while (!_exit)
