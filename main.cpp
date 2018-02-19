@@ -9,10 +9,10 @@ DEFINE_string(local_ip, "0.0.0.0", "What ip to bind on");
 DEFINE_int32(local_port, 1234, "What port to listen on");
 DEFINE_string(remote_ip, "0.0.0.0", "What ip to use to send recorded audio");
 DEFINE_int32(remote_port, 1880, "What port to use to send recorded audio");
-
 DEFINE_string(alsaout, "", "device to use for playing");
 DEFINE_string(hotword_sensitivity, "0.54", "sensitivity to use for the hotword engine");
 DEFINE_string(hotword_model, "sarah.pmdl", "model file to use for the hotword engine");
+DEFINE_bool(frontend_algo, false, "if hotword engine must use its frontend algorithms");
 
 #include <matrix_hal/wishbone_bus.h>
 
@@ -62,6 +62,8 @@ int main(int argc, char** argv)
 
 	LOG(INFO) << "Initialise done";
 
+	LOG(INFO) << "Running ...";
+	
 	for(;;)
 	{
 		if (exit_requested)

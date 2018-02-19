@@ -1,14 +1,43 @@
 #pragma once
 
+#include <cstring>
 #include <memory>
 
 #include "event-notifier.h"
 #include "matrix_mics.h"
 
-class Snowboy;
+#include "snowboy_wrapper.h"
 
 namespace sarah_matrix
 {
+
+	struct record_state
+	{
+		record_state()
+		{
+			average_energy = 0;
+			tick_after_hotword = 0;
+			total_tick_after_hotword = 0;
+			record_len = 0;
+
+			std::memset(record_buffer, 0, sizeof record_buffer);
+		}
+
+		void reset(int64_t avg = 0)
+		{
+			average_energy = avg;
+			tick_after_hotword = 0;
+			total_tick_after_hotword = 0;
+			record_len = 0;		
+		}
+
+		int64_t average_energy;
+		uint16_t tick_after_hotword;
+		uint16_t total_tick_after_hotword;
+		uint64_t record_len;
+
+		int16_t	record_buffer[(10000 + 1) * (WINDOW_SIZE / 256)];
+	};
 
 	class recorder
 	{
@@ -30,9 +59,8 @@ namespace sarah_matrix
 
 		bool _isplaying;
 
-		uint16_t total_tick_after_hotword;
-
-		std::unique_ptr<Snowboy>	_detector;
+		std::unique_ptr<Snowboy>		_detector;
+		std::unique_ptr<record_state>	_state;
 	};
 
 }
