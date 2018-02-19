@@ -48,7 +48,13 @@ Client SARAH
     -remote_ip 'addresse du node pour l'envoi du buffer audio capturé'
     -remote_port 'le port associé'
 
-Avec un appreçu du node-red (SARAHv5 @JpEncausse) pour la partie "serveur"
+
+Update 2018 02 xx
+- refonte du code
+
+
+
+Avec un apperçu du node-red (SARAHv5 @JpEncausse) pour la partie "serveur"
 ![alt text](https://github.com/ORevelat/MatrixVoice/blob/master/node-red/buttler-main.png)
 ![alt text](https://github.com/ORevelat/MatrixVoice/blob/master/node-red/buttler_mode.png)
 

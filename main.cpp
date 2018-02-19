@@ -2,7 +2,7 @@
 #include <csignal>
 #include <unistd.h>
 #include <iostream>
-#include <functional>
+
 
 #define STRIP_FLAG_HELP 1
 #include <gflags/gflags.h>
@@ -12,12 +12,9 @@
 
 #include "main.h"
 
-#include "http_server.h"
-#include "http_client.h"
-#include "matrix_leds.h"
+#include "event-notifier.h"
 #include "matrix_mics.h"
-#include "speak.h"
-#include "listen.h"
+
 
 DEFINE_string(ip, "0.0.0.0", "What ip to bind on");
 DEFINE_int32(port, 1234, "What port to listen on");
@@ -31,13 +28,6 @@ using namespace sarah_matrix;
 
 void SignalHandler(int)
 {
-	http_server* server = http_server::getInstance();
-	if (server)
-		server->stop();
-
-	listen* ls = listen::getInstance();
-	if (ls)
-		ls->stop();
 }
 
 int main(int argc, char** argv)
@@ -45,7 +35,7 @@ int main(int argc, char** argv)
     FLAGS_logtostderr = 1; 
 
     gflags::SetUsageMessage("Listen and speak module for Sarah using Matrix Voice & Raspberry");
-    gflags::SetVersionString("0.2.0");
+    gflags::SetVersionString("0.5.0");
 
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -64,26 +54,11 @@ int main(int argc, char** argv)
 	matrix_hal::WishboneBus bus;
 	bus.SpiInit();
 
-	leds voiceLeds(bus);
-	mics voiceMics(bus);
-
-	listen* ls = listen::getInstance();
-	speak sp(FLAGS_alsaout, &voiceLeds);
-	http_server* server = http_server::getInstance();
-	http_client client(FLAGS_remote_ip, FLAGS_remote_port);
+	event_notifier notifier;
 
 	LOG(INFO) << "Initialise done";
 
-	server->start(FLAGS_ip, FLAGS_port, &sp);
-	ls->start(&voiceMics, &voiceLeds, &client, &sp);
-
-	server->wait();
-	ls->wait();
-
 	LOG(INFO) << "Deinitialising ...";
-
-	http_server::delInstance();
-	listen::delInstance();
 
     gflags::ShutDownCommandLineFlags();
 

@@ -22,13 +22,13 @@ namespace sarah_matrix
 		_mics.Read();
 
 		for (uint32_t s = 0; s < NUMBER_SAMPLE; s++) {
-			_buffer.add(_mics.Beam(s));
+			_buffer.pushpop(_mics.Beam(s));
 		}
 
-		return _buffer.average();
+		return _buffer.average_energy();
 	}
 
-		// return last read buffer
+	// return last read buffer
 	const int16_t* mics::last() const
 	{
 		return _buffer.lastsamples(NUMBER_SAMPLE);
