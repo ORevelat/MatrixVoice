@@ -13,14 +13,15 @@
 namespace sarah_matrix
 {
 
-	class mics
+	class microphones
 	{
 	public:
-		mics(matrix_hal::WishboneBus&);
+		microphones(matrix_hal::WishboneBus&);
 
-		int64_t read();
+		void read();
 		
 		const int16_t* last() const;
+		int64_t average_energy() const;
 
 	private:
 		matrix_hal::MicrophoneArray	_mics;

@@ -12,17 +12,20 @@ namespace sarah_matrix
     public:
         enum Type
         {
-            STARTED,
+            INITIALISE,
+            START,
             HOTWORD_DETECTED,
             RECORD_START,
             RECORD_END,
             SPEAK_START,
             SPEAK_END,
-            ENDED
+            STOP,
+            DEINITIALISE
         };
 
     public:
         event_notifier();
+        ~event_notifier();
 
         void function_register(Type, std::function<void()>);
 
