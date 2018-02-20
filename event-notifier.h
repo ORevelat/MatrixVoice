@@ -27,12 +27,12 @@ namespace sarah_matrix
         event_notifier();
         ~event_notifier();
 
-        void function_register(Type, std::function<void()>);
+        void function_register(Type, std::function<void(void*)>);
 
-        void notify(Type);
+        void notify(Type, void* param = 0);
 
     private:
-        std::map<Type, std::vector< std::function<void()> > >	_map;
+        std::map<Type, std::vector< std::function<void(void*)> > >	_map;
     };
 
 }

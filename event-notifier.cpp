@@ -11,15 +11,15 @@ namespace sarah_matrix
 		LOG(INFO) << "event_notifier initialising ...";
 
 		_map.clear();
-		_map[INITIALISE] = std::vector< std::function<void()> >();
-		_map[START] = std::vector< std::function<void()> >();
-		_map[HOTWORD_DETECTED] = std::vector< std::function<void()> >();
-		_map[RECORD_START] = std::vector< std::function<void()> >();
-		_map[RECORD_END] = std::vector< std::function<void()> >();
-		_map[SPEAK_START] = std::vector< std::function<void()> >();
-		_map[SPEAK_END] = std::vector< std::function<void()> >();
-		_map[STOP] = std::vector< std::function<void()> >();
-		_map[DEINITIALISE] = std::vector< std::function<void()> >();
+		_map[INITIALISE] = std::vector< std::function<void(void*)> >();
+		_map[START] = std::vector< std::function<void(void*)> >();
+		_map[HOTWORD_DETECTED] = std::vector< std::function<void(void*)> >();
+		_map[RECORD_START] = std::vector< std::function<void(void*)> >();
+		_map[RECORD_END] = std::vector< std::function<void(void*)> >();
+		_map[SPEAK_START] = std::vector< std::function<void(void*)> >();
+		_map[SPEAK_END] = std::vector< std::function<void(void*)> >();
+		_map[STOP] = std::vector< std::function<void(void*)> >();
+		_map[DEINITIALISE] = std::vector< std::function<void(void*)> >();
 	}
 
 	event_notifier::~event_notifier()
@@ -27,17 +27,17 @@ namespace sarah_matrix
 		_map.clear();
 	}
 
-	void event_notifier::function_register(Type t, std::function<void()> func)
+	void event_notifier::function_register(Type t, std::function<void(void*)> func)
 	{
 		auto& currentlist = _map[t];
 		currentlist.push_back(func);
 	}
   
-	void event_notifier::notify(Type t)
+	void event_notifier::notify(Type t, void* param)
 	{
 		for (auto i : _map[t])
 		{
-			i();
+			i(param);
 		}
 	}
   

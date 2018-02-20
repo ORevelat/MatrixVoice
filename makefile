@@ -28,7 +28,7 @@ endif
 
 all: $(EXE)
 
-$(EXE): main.o event-notifier.o matrix_mics.o recorder.o snowboy_wrapper.o
+$(EXE): main.o event-notifier.o matrix_mics.o recorder.o snowboy_wrapper.o http_post.o
 	$(CXX) $^ -o $@ $(CXXFLAGS) $(PATH_LIB) $(LIBS)
 
 %.o: %.cpp %.h

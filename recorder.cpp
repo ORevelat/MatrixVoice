@@ -14,8 +14,8 @@ namespace sarah_matrix
 	{
 		_notif.function_register(event_notifier::INITIALISE, std::bind(&recorder::initialise, this));
 		_notif.function_register(event_notifier::DEINITIALISE, std::bind(&recorder::deinitialise, this));
-		_notif.function_register(event_notifier::SPEAK_START, [&] { _isplaying = true; });
-		_notif.function_register(event_notifier::SPEAK_END, [&] { _isplaying = false; });
+		_notif.function_register(event_notifier::SPEAK_START, [&](void*) { _isplaying = true; });
+		_notif.function_register(event_notifier::SPEAK_END, [&](void*) { _isplaying = false; });
 	}
 
 	void recorder::initialise()
@@ -57,7 +57,7 @@ namespace sarah_matrix
 			int result = _detector.get()->RunDetection(_mics.last(), NUMBER_SAMPLE);
 			if (result > 0) 
 			{
-				_state.get()->reset(avg);
+				_state.get()->reset(avg, true);
 
 				_notif.notify(event_notifier::HOTWORD_DETECTED);
 				_notif.notify(event_notifier::RECORD_START);
@@ -81,7 +81,7 @@ namespace sarah_matrix
 		{
 			_state.get()->reset();
 
-			_notif.notify(event_notifier::RECORD_END);
+			_notif.notify(event_notifier::RECORD_END, (void*)_state.get());
 		}
 	}
 }

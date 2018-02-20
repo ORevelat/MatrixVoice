@@ -23,12 +23,13 @@ namespace sarah_matrix
 			std::memset(record_buffer, 0, sizeof record_buffer);
 		}
 
-		void reset(int64_t avg = 0)
+		void reset(int64_t avg = 0, bool reset_len = false)
 		{
 			average_energy = avg;
 			tick_after_hotword = 0;
 			total_tick_after_hotword = 0;
-			record_len = 0;		
+			if (reset_len)
+				record_len = 0;		
 		}
 
 		int64_t average_energy;
