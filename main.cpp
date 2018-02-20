@@ -2,6 +2,7 @@
 #include <csignal>
 #include <unistd.h>
 #include <iostream>
+#include <thread>
 
 #include "main.h"
 
@@ -18,6 +19,7 @@ DEFINE_bool(frontend_algo, false, "if hotword engine must use its frontend algor
 #include "event-notifier.h"
 
 #include "recorder.h"
+#include "display.h"
 #include "http_post.h"
 
 using namespace sarah_matrix;
@@ -55,7 +57,9 @@ int main(int argc, char** argv)
 
 	event_notifier notifier;
 	microphones mics(bus);
+	leds led(bus);
 	recorder rec(notifier, mics);
+	display disp(notifier, led);
 	http_post post(notifier);
 
 	// if there is some subscription for init
@@ -65,6 +69,10 @@ int main(int argc, char** argv)
 
 	LOG(INFO) << "Running ...";
 	
+	notifier.notify(event_notifier::SPEAK_START);
+	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+	notifier.notify(event_notifier::SPEAK_END);
+
 	for(;;)
 	{
 		if (exit_requested)
