@@ -21,6 +21,8 @@ DEFINE_bool(frontend_algo, false, "if hotword engine must use its frontend algor
 #include "recorder.h"
 #include "display.h"
 #include "http_post.h"
+#include "http_server.h"
+#include "speaker.h"
 
 using namespace sarah_matrix;
 
@@ -61,6 +63,8 @@ int main(int argc, char** argv)
 	recorder rec(notifier, mics);
 	display disp(notifier, led);
 	http_post post(notifier);
+	http_server server(notifier);
+	speaker sp(notifier);
 
 	// if there is some subscription for init
 	notifier.notify(event_notifier::INITIALISE);
@@ -69,10 +73,6 @@ int main(int argc, char** argv)
 
 	LOG(INFO) << "Running ...";
 	
-	notifier.notify(event_notifier::SPEAK_START);
-	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-	notifier.notify(event_notifier::SPEAK_END);
-
 	for(;;)
 	{
 		if (exit_requested)
