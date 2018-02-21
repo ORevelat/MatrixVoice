@@ -17,6 +17,7 @@ namespace sarah_matrix
             HOTWORD_DETECTED,
             RECORD_START,
             RECORD_END,
+            SPEAK_RECEIVED,
             SPEAK_START,
             SPEAK_END,
             STOP,

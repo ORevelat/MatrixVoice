@@ -46,7 +46,7 @@ namespace sarah_matrix
 		svr.get(R"(/speak/(.*))", [&](const Request& req, Response& res) {
 			auto text = req.matches[1];
 
-			_notif.notify(event_notifier::SPEAK_START);
+			_notif.notify(event_notifier::SPEAK_RECEIVED, &text);
 
 			res.set_content("OK", "text/plain");
 		});

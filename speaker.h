@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "event-notifier.h"
 
 namespace sarah_matrix
@@ -14,8 +16,13 @@ namespace sarah_matrix
 		void initialise();
 		void deinitialise();
 		
+		void speak(void*);
+		void play(void*);
+
  		private:
 		event_notifier& _notif;
+
+		std::string _alsaopt;
 	};
 
 }

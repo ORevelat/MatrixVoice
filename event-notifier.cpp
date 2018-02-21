@@ -16,6 +16,7 @@ namespace sarah_matrix
 		_map[HOTWORD_DETECTED] = std::vector< std::function<void(void*)> >();
 		_map[RECORD_START] = std::vector< std::function<void(void*)> >();
 		_map[RECORD_END] = std::vector< std::function<void(void*)> >();
+		_map[SPEAK_RECEIVED] = std::vector< std::function<void(void*)> >();
 		_map[SPEAK_START] = std::vector< std::function<void(void*)> >();
 		_map[SPEAK_END] = std::vector< std::function<void(void*)> >();
 		_map[STOP] = std::vector< std::function<void(void*)> >();
