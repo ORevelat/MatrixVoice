@@ -101,7 +101,7 @@ namespace sarah_matrix
 		uint16_t total_tick_after_hotword = 0;
 
 		// up to 10 seconds of sound
-		int16_t	record_buffer[(10000 + 1) * (WINDOW_SIZE / 256)];
+		int16_t	record_buffer[10000 * (WINDOW_SIZE / 256)];
 		size_t	record_len = 0;
 
 		while (!_exit)
@@ -125,8 +125,10 @@ namespace sarah_matrix
 		
 			if (avg_for_hotword > 0) {
 				// copy to keep raw buffer
-				std::memcpy(record_buffer + record_len, _mics->last(), NUMBER_SAMPLE * sizeof(int16_t));
-				record_len += NUMBER_SAMPLE;
+				if ((record_len + NUMBER_SAMPLE) < sizeof (record_buffer)) {
+					std::memcpy(record_buffer + record_len, _mics->last(), NUMBER_SAMPLE * sizeof(int16_t));
+					record_len += NUMBER_SAMPLE;
+				}
 
 				total_tick_after_hotword++;
 				if (wnd_avg < avg_for_hotword)
