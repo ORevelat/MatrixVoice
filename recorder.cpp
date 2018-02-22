@@ -2,7 +2,7 @@
 #include "main.h"
 #include "recorder.h"
 
-#define SILENCE_COUNT	3 * WINDOW_SIZE / 256
+#define SILENCE_COUNT	4 * WINDOW_SIZE / 256
 #define MAX_COUNT		10000 / (WINDOW_SIZE / 256)
 
 namespace sarah_matrix

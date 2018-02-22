@@ -12,11 +12,24 @@ namespace sarah_matrix
 		_notif.function_register(event_notifier::INITIALISE, std::bind(&display::initialise, this));
 		_notif.function_register(event_notifier::DEINITIALISE, std::bind(&display::deinitialise, this));
 
-		_notif.function_register(event_notifier::HOTWORD_DETECTED, [&] (void*) { std::thread t(&display::hotword_detected, this); t.detach(); });
+		_notif.function_register(event_notifier::HOTWORD_DETECTED, 
+			[&] (void*) { 
+				std::thread t(&display::hotword_detected, this);
+				t.detach();
+		});
 		_notif.function_register(event_notifier::RECORD_START, [&] (void*) { /* nothing */ });
-		_notif.function_register(event_notifier::RECORD_END, [&] (void*) { std::thread t(&display::speech_ended, this); t.detach(); });
+		_notif.function_register(event_notifier::RECORD_END, 
+			[&] (void*) { 
+				std::thread t(&display::speech_ended, this);
+				t.detach();
+		});
 
-		_notif.function_register(event_notifier::SPEAK_START, [&] (void*) { _stop_speak = false; std::thread t(&display::speak_started, this); t.detach(); });
+		_notif.function_register(event_notifier::SPEAK_START, 
+			[&] (void*) { 
+				_stop_speak = false;
+				std::thread t(&display::speak_started, this);
+				t.detach();
+		});
 		_notif.function_register(event_notifier::SPEAK_END, [&] (void*) { _stop_speak = true; });
 	}
 

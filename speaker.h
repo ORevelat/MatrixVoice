@@ -16,8 +16,8 @@ namespace sarah_matrix
 		void initialise();
 		void deinitialise();
 		
-		void speak(void*);
-		void play(void*);
+		void speak(std::string);
+		void play(std::string);
 
  		private:
 		event_notifier& _notif;

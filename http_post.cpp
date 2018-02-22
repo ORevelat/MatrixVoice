@@ -23,7 +23,11 @@ namespace sarah_matrix
 	{
 		_notif.function_register(event_notifier::INITIALISE, std::bind(&http_post::initialise, this));
 		_notif.function_register(event_notifier::DEINITIALISE, std::bind(&http_post::deinitialise, this));
-		_notif.function_register(event_notifier::RECORD_END, [&] (void* param) { std::thread t(&http_post::post, this, param); t.detach(); });
+		_notif.function_register(event_notifier::RECORD_END, 
+			[&] (void* param) { 
+				std::thread t(&http_post::post, this, param); 
+				t.detach();
+		});
 	}
 
 	void http_post::initialise()

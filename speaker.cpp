@@ -11,8 +11,17 @@ namespace sarah_matrix
 	{
 		_notif.function_register(event_notifier::INITIALISE, std::bind(&speaker::initialise, this));
 		_notif.function_register(event_notifier::DEINITIALISE, std::bind(&speaker::deinitialise, this));
-		_notif.function_register(event_notifier::HOTWORD_DETECTED, [&] (void*) { std::thread t(&speaker::play, this, (void*)"ding.wav"); t.detach(); });
-		_notif.function_register(event_notifier::SPEAK_RECEIVED, [&] (void* p) { std::thread t(&speaker::speak, this, p); t.detach(); });
+		_notif.function_register(event_notifier::HOTWORD_DETECTED, 
+			[&] (void*) { 
+				std::thread t(&speaker::play, this, std::string("ding.wav")); 
+				t.detach(); 
+		});
+		_notif.function_register(event_notifier::SPEAK_RECEIVED, 
+			[&] (void* p) { 
+				std::string s( *(reinterpret_cast<std::string*>(p)) );
+				std::thread t(&speaker::speak, this, s); 
+				t.detach();
+		});
 	}
 	
 	void speaker::initialise()
@@ -33,11 +42,9 @@ namespace sarah_matrix
 		LOG(INFO) << "speaker deinitialised";
 	}
 
-	void speaker::speak(void* param)
+	void speaker::speak(std::string text)
 	{
 		_notif.notify(event_notifier::SPEAK_START);
-
-		std::string text(*(reinterpret_cast<std::string*>(param)));
 
 	   	LOG(INFO) << " == speak - " << text;
 
@@ -53,11 +60,11 @@ namespace sarah_matrix
 		_notif.notify(event_notifier::SPEAK_END);
 	}
 
-	void speaker::play(void* file)
+	void speaker::play(std::string file)
 	{
-	   	LOG(INFO) << " == sound - " << (char*)file;
+	   	LOG(INFO) << " == sound - " << file;
 
-		std::string aplay = "aplay -q " + _alsaopt + " ./resources/" + std::string(reinterpret_cast<char*>(file));
+		std::string aplay = "aplay -q " + _alsaopt + " ./resources/" + file;
 		system(aplay.c_str());
 	}
 
