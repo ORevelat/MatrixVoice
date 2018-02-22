@@ -67,8 +67,11 @@ namespace sarah_matrix
 		if (_state.get()->average_energy > 0)
 		{
 			// copy to keep raw buffer
-			std::memcpy(_state.get()->record_buffer + _state.get()->record_len, _mics.last(), NUMBER_SAMPLE * sizeof(int16_t));
-			_state.get()->record_len += NUMBER_SAMPLE;
+			if ((_state.get()->record_len + NUMBER_SAMPLE) < sizeof _state.get()->record_buffer)
+			{
+				std::memcpy(_state.get()->record_buffer + _state.get()->record_len, _mics.last(), NUMBER_SAMPLE * sizeof(int16_t));
+				_state.get()->record_len += NUMBER_SAMPLE;
+			}
 
 			_state.get()->total_tick_after_hotword++;
 			if (avg < _state.get()->average_energy)

@@ -37,7 +37,7 @@ namespace sarah_matrix
 		uint16_t total_tick_after_hotword;
 		uint64_t record_len;
 
-		int16_t	record_buffer[(10000 + 1) * (WINDOW_SIZE / 256)];
+		int16_t	record_buffer[10000 * (WINDOW_SIZE / 256)];
 	};
 
 	class recorder
