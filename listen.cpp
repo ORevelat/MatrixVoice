@@ -20,7 +20,7 @@
 
 #include "snowboy_wrapper.h"
 
-#define SILENCE_COUNT	3 * WINDOW_SIZE / 256
+#define SILENCE_COUNT	4 * WINDOW_SIZE / 256
 // 10 sec maximum
 #define MAX_COUNT		10000 / (WINDOW_SIZE / 256)
 
