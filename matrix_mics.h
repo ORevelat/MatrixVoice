@@ -7,7 +7,7 @@
 
 #define SAMPLING_RATE	16000
 #define NUMBER_SAMPLE	256
-#define WINDOW_SIZE		4096
+#define WINDOW_SIZE		8192
 #define AUDIO_GAIN		1
 
 namespace sarah_matrix

@@ -20,9 +20,8 @@
 
 #include "snowboy_wrapper.h"
 
-#define SILENCE_COUNT	4 * WINDOW_SIZE / 256
-// 10 sec maximum
-#define MAX_COUNT		10000 / (WINDOW_SIZE / 256)
+#define BUFFER_SIZE		10 * SAMPLING_RATE		// 10 seconds
+#define SILENCE_COUNT	SAMPLING_RATE / 16		// 64 ms
 
 #define SNOWBOY_FRONTEND_ALGO	false
 
@@ -90,7 +89,7 @@ namespace sarah_matrix
 
 		// Initializes Snowboy detector.
 		Snowboy detector("resources/common.res", "resources/sarah.pmdl");
-		detector.SetSensitivity("0.54");
+		detector.SetSensitivity("0.48");
 		detector.SetAudioGain(1.0);
 		detector.ApplyFrontend(SNOWBOY_FRONTEND_ALGO);
 
@@ -100,8 +99,7 @@ namespace sarah_matrix
 		uint16_t tick_after_hotword = 0;
 		uint16_t total_tick_after_hotword = 0;
 
-		// up to 10 seconds of sound
-		int16_t	record_buffer[10000 * (WINDOW_SIZE / 256)];
+		int16_t	record_buffer[BUFFER_SIZE];
 		size_t	record_len = 0;
 
 		while (!_exit)
@@ -130,14 +128,14 @@ namespace sarah_matrix
 					record_len += NUMBER_SAMPLE;
 				}
 
-				total_tick_after_hotword++;
+				total_tick_after_hotword += NUMBER_SAMPLE;
 				if (wnd_avg < avg_for_hotword)
-					tick_after_hotword ++;
+					tick_after_hotword += NUMBER_SAMPLE;
 				else
 					tick_after_hotword = 0;
 			}
 
-			if ((tick_after_hotword > SILENCE_COUNT) || (total_tick_after_hotword > MAX_COUNT))
+			if ((tick_after_hotword > SILENCE_COUNT) || (total_tick_after_hotword > BUFFER_SIZE))
 			{
 				avg_for_hotword = 0;
 				tick_after_hotword = 0;
