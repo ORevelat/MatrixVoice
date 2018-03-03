@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <iostream>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "main.h"
 
@@ -26,11 +28,12 @@ DEFINE_bool(frontend_algo, false, "if hotword engine must use its frontend algor
 
 using namespace sarah_matrix;
 
-bool exit_requested;
+std::mutex exit_mtx;
+std::condition_variable exit_cvar;
 
 void SignalHandler(int)
 {
-	exit_requested = true;
+	exit_cvar.notify_one();
 }
 
 int main(int argc, char** argv)
@@ -38,7 +41,7 @@ int main(int argc, char** argv)
 	FLAGS_logtostderr = 1; 
 
     gflags::SetUsageMessage("Listen and speak module for Sarah using Matrix Voice & Raspberry");
-    gflags::SetVersionString("0.5.0");
+    gflags::SetVersionString("0.5.1");
 
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -54,12 +57,17 @@ int main(int argc, char** argv)
 
 	LOG(INFO) << "Initialising ...";
 
+	// hardware init
 	matrix_hal::WishboneBus bus;
 	bus.SpiInit();
 
-	event_notifier notifier;
 	microphones mics(bus);
 	leds led(bus);
+
+	// notifier to send messages between classes
+	event_notifier notifier;
+
+	// our high level objects
 	recorder rec(notifier, mics);
 	display disp(notifier, led);
 	http_post post(notifier);
@@ -73,13 +81,13 @@ int main(int argc, char** argv)
 
 	LOG(INFO) << "Running ...";
 	
-	for(;;)
-	{
-		if (exit_requested)
-			break;
+	notifier.notify(event_notifier::START);
 
-		rec.record();
-	}
+	// and wait for ctrl+c
+ 	std::unique_lock<std::mutex> lck(exit_mtx);
+    exit_cvar.wait(lck);
+	
+	notifier.notify(event_notifier::STOP);
 
 	LOG(INFO) << "Deinitialising ...";
 

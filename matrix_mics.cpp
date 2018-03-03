@@ -11,7 +11,7 @@ namespace sarah_matrix
 		_mics.SetSamplingRate(SAMPLING_RATE);
 		_mics.SetGain(AUDIO_GAIN);
 
-		_buffer.resize(WINDOW_SIZE);
+		_buffer.resize(WINDOW_SIZE_MS * (SAMPLING_RATE / 1000));
 	}
 
 	// read microphone beam & store to circular buffer

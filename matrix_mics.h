@@ -5,10 +5,10 @@
 
 #include "circularbuffer.h"
 
-#define SAMPLING_RATE	16000
-#define NUMBER_SAMPLE	256
-#define WINDOW_SIZE		4096
-#define AUDIO_GAIN		1
+#define SAMPLING_RATE		16000
+#define NUMBER_SAMPLE		256
+#define WINDOW_SIZE_MS		512
+#define AUDIO_GAIN			1
 
 namespace sarah_matrix
 {

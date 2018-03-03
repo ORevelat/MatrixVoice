@@ -1,5 +1,8 @@
 #pragma once
 
+#include <mutex>
+#include <condition_variable>
+
 #include "event-notifier.h"
 
 namespace sarah_matrix
@@ -14,7 +17,7 @@ namespace sarah_matrix
 		void initialise();
 		void deinitialise();
 
-		void run();
+		void main_loop();
 
 		private:
 		event_notifier&	_notif;
@@ -23,6 +26,9 @@ namespace sarah_matrix
 		uint16_t	_port;
 
 		void* _http;
+
+		std::mutex _exit_mtx;
+		std::condition_variable _exit_cvar;
 	};
 
 }

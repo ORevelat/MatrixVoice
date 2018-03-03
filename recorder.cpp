@@ -1,21 +1,37 @@
+#include <thread>
 
 #include "main.h"
 #include "recorder.h"
 
-#define SILENCE_COUNT	4 * WINDOW_SIZE / 256
-#define MAX_COUNT		10000 / (WINDOW_SIZE / 256)
+#define SPEECH_SILENCE_MS			512
+#define SPEECH_SILENCE_COUNT		(SPEECH_SILENCE_MS * SAMPLING_RATE) / (1000 * NUMBER_SAMPLE)
+#define MAX_SPEECH_RECORD_COUNT		(RECORD_MAX_DURATION_MS * SAMPLING_RATE) / (1000 * NUMBER_SAMPLE)
 
 namespace sarah_matrix
 {
 	
 	recorder::recorder(event_notifier& n, microphones& mics)
 		: _notif(n), _mics(mics)
-		, _isplaying(false)
+		, _exit(false), _isplaying(false)
 	{
 		_notif.function_register(event_notifier::INITIALISE, std::bind(&recorder::initialise, this));
 		_notif.function_register(event_notifier::DEINITIALISE, std::bind(&recorder::deinitialise, this));
-		_notif.function_register(event_notifier::SPEAK_START, [&](void*) { _isplaying = true; });
-		_notif.function_register(event_notifier::SPEAK_END, [&](void*) { _isplaying = false; });
+
+		_notif.function_register(event_notifier::START,
+			[&] (void*) { 
+				_exit = false;
+				std::thread t(&recorder::main_loop, this);
+				t.detach();
+		});
+		_notif.function_register(event_notifier::STOP,
+			[&] (void*) { 
+				_exit = true; 
+				std::unique_lock<std::mutex> lck(_exit_mtx);
+    			_exit_cvar.wait(lck);
+		});
+
+		_notif.function_register(event_notifier::SPEAK_START, [&] (void*) { _isplaying = true; });
+		_notif.function_register(event_notifier::SPEAK_END, [&] (void*) { _isplaying = false; });
 	}
 
 	void recorder::initialise()
@@ -44,47 +60,54 @@ namespace sarah_matrix
 		LOG(INFO) << "recorder deinitialised";
 	}
 
-	void recorder::record()
+	void recorder::main_loop()
 	{
 		if (!_detector || !_state)
 			return;
-	
-		_mics.read();
 
-		int64_t avg = _mics.average_energy();
-		if (!_isplaying && (_state.get()->total_tick_after_hotword == 0))
+		LOG(INFO) << " == recorder start";
+		
+		while(!_exit)
 		{
-			int result = _detector.get()->RunDetection(_mics.last(), NUMBER_SAMPLE);
-			if (result > 0) 
-			{
-				_state.get()->reset(avg, true);
+			_mics.read();
 
-				_notif.notify(event_notifier::HOTWORD_DETECTED);
-				_notif.notify(event_notifier::RECORD_START);
+			int64_t avg = _mics.average_energy();
+
+			// if playing or speech recording, do not perform hotword detection
+			if (!_isplaying && (_state.get()->total_tick_after_hotword == 0))
+			{
+				int result = _detector.get()->RunDetection(_mics.last(), NUMBER_SAMPLE);
+				if (result > 0) 
+				{
+					_state.get()->reset(avg, true);
+
+					_notif.notify(event_notifier::HOTWORD_DETECTED);
+					_notif.notify(event_notifier::RECORD_START);
+				}
+			}
+
+			if (_state.get()->average_energy > 0)
+			{
+				// copy to keep raw buffer
+				_state.get()->copy_to_buffer(_mics.last(), NUMBER_SAMPLE);
+
+				_state.get()->total_tick_after_hotword++;
+				if (avg < _state.get()->average_energy)
+					_state.get()->tick_after_hotword ++;
+				else
+					_state.get()->tick_after_hotword = 0;
+			}
+
+			if ( (_state.get()->tick_after_hotword >= SPEECH_SILENCE_COUNT) 
+				|| (_state.get()->total_tick_after_hotword >= MAX_SPEECH_RECORD_COUNT))
+			{
+				_state.get()->reset();
+
+				_notif.notify(event_notifier::RECORD_END, (void*)_state.get());
 			}
 		}
 
-		if (_state.get()->average_energy > 0)
-		{
-			// copy to keep raw buffer
-			if ((_state.get()->record_len + NUMBER_SAMPLE) < sizeof _state.get()->record_buffer)
-			{
-				std::memcpy(_state.get()->record_buffer + _state.get()->record_len, _mics.last(), NUMBER_SAMPLE * sizeof(int16_t));
-				_state.get()->record_len += NUMBER_SAMPLE;
-			}
-
-			_state.get()->total_tick_after_hotword++;
-			if (avg < _state.get()->average_energy)
-				_state.get()->tick_after_hotword ++;
-			else
-				_state.get()->tick_after_hotword = 0;
-		}
-
-		if ((_state.get()->tick_after_hotword > SILENCE_COUNT) || (_state.get()->total_tick_after_hotword > MAX_COUNT))
-		{
-			_state.get()->reset();
-
-			_notif.notify(event_notifier::RECORD_END, (void*)_state.get());
-		}
+		LOG(INFO) << " == recorder stopped";
+		_exit_cvar.notify_one();
 	}
 }
