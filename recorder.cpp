@@ -3,10 +3,6 @@
 #include "main.h"
 #include "recorder.h"
 
-#define SPEECH_SILENCE_MS			512
-#define SPEECH_SILENCE_COUNT		(SPEECH_SILENCE_MS * SAMPLING_RATE) / (1000 * NUMBER_SAMPLE)
-#define MAX_SPEECH_RECORD_COUNT		(RECORD_MAX_DURATION_MS * SAMPLING_RATE) / (1000 * NUMBER_SAMPLE)
-
 namespace sarah_matrix
 {
 	
@@ -65,7 +61,7 @@ namespace sarah_matrix
 		if (!_detector || !_state)
 			return;
 
-		LOG(INFO) << " == recorder start";
+		LOG(INFO) << " == recorder started";
 		
 		while(!_exit)
 		{
@@ -74,36 +70,32 @@ namespace sarah_matrix
 			int64_t avg = _mics.average_energy();
 
 			// if playing or speech recording, do not perform hotword detection
-			if (!_isplaying && (_state.get()->total_tick_after_hotword == 0))
+			if (!_isplaying && !_state.get()->is_recording())
 			{
 				int result = _detector.get()->RunDetection(_mics.last(), NUMBER_SAMPLE);
 				if (result > 0) 
 				{
-					_state.get()->reset(avg, true);
+					_state.get()->start_record(avg);
 
 					_notif.notify(event_notifier::HOTWORD_DETECTED);
 					_notif.notify(event_notifier::RECORD_START);
 				}
 			}
 
-			if (_state.get()->average_energy > 0)
+			if (_state.get()->is_recording())
 			{
 				// copy to keep raw buffer
 				_state.get()->copy_to_buffer(_mics.last(), NUMBER_SAMPLE);
 
-				_state.get()->total_tick_after_hotword++;
-				if (avg < _state.get()->average_energy)
-					_state.get()->tick_after_hotword ++;
-				else
-					_state.get()->tick_after_hotword = 0;
+				// increment frame record counter
+				_state.get()->increment_ticks(avg);
 			}
 
-			if ( (_state.get()->tick_after_hotword >= SPEECH_SILENCE_COUNT) 
-				|| (_state.get()->total_tick_after_hotword >= MAX_SPEECH_RECORD_COUNT))
+			// if end of speech (silence or max record time)
+			if (_state.get()->speech_ended())
 			{
+				_notif.notify(event_notifier::RECORD_END, _state.get()->infobuffer());
 				_state.get()->reset();
-
-				_notif.notify(event_notifier::RECORD_END, (void*)_state.get());
 			}
 		}
 

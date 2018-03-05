@@ -46,7 +46,7 @@ namespace sarah_matrix
 	{
 		_notif.notify(event_notifier::SPEAK_START);
 
-	   	LOG(INFO) << " == speak - " << text;
+	   	LOG(INFO) << " == speak started - " << text;
 
 		std::string command("pico2wave -l fr-FR -w /tmp/test.wav ");
 		command += "\"" + text + "\"";
@@ -58,14 +58,18 @@ namespace sarah_matrix
 		system("rm /tmp/test.wav");
 
 		_notif.notify(event_notifier::SPEAK_END);
+
+	   	LOG(INFO) << " == speak done";
 	}
 
 	void speaker::play(std::string file)
 	{
-	   	LOG(INFO) << " == sound - " << file;
+	   	LOG(INFO) << " == sound started - " << file;
 
 		std::string aplay = "aplay -q " + _alsaopt + " ./resources/" + file;
 		system(aplay.c_str());
+
+	   	LOG(INFO) << " == sound done";
 	}
 
 }

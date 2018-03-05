@@ -49,7 +49,10 @@ namespace sarah_matrix
 	
 	void http_post::post(void* st)
 	{
-		record_state* state = reinterpret_cast<record_state*>(st);
+		std::unique_ptr<audio_buffer> buffer;
+
+		// get ownership to release memory
+		buffer.reset( reinterpret_cast<audio_buffer*>(st) );
 
 		curl_global_init(CURL_GLOBAL_ALL);
 		
@@ -62,7 +65,7 @@ namespace sarah_matrix
 		std::ostringstream url;
 		url << "http://" << _url;
 
-		std::string encoded = base64_encode((char unsigned const*)&state->record_buffer[0], state->record_len * sizeof(int16_t));
+		std::string encoded = base64_encode((char unsigned const*)& buffer.get()->_buffer[0],  buffer.get()->_len * sizeof(int16_t));
 		encoded = "buffer=" + std::string(curl_easy_escape(curl , encoded.data(), encoded.size()));
 
 		struct WriteThis wt;
@@ -70,7 +73,7 @@ namespace sarah_matrix
 		wt.readptr = &encoded[0];
 		wt.sizeleft = encoded.size();
 
-		LOG(INFO) << " == sending " << wt.sizeleft<< " bytes to " << url.str();
+		LOG(INFO) << " == send started - " << wt.sizeleft<< " bytes to " << url.str();
 
 		curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
 		curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -85,6 +88,8 @@ namespace sarah_matrix
 			return;
 		}
 		
+		LOG(INFO) << " == send done";
+
 		curl_easy_cleanup(curl);
 		curl_global_cleanup();
 	}
