@@ -12,17 +12,14 @@ namespace sarah_matrix
 		_notif.function_register(event_notifier::INITIALISE, std::bind(&display::initialise, this));
 		_notif.function_register(event_notifier::DEINITIALISE, std::bind(&display::deinitialise, this));
 
-		_notif.function_register(event_notifier::HOTWORD_DETECTED, 
+		_notif.function_register(event_notifier::HOTWORD_DETECTED, [&] (void*) { /* nothing */});
+		_notif.function_register(event_notifier::RECORD_START, 
 			[&] (void*) { 
-				std::thread t(&display::hotword_detected, this);
+				_stop_speech = false;
+				std::thread t(&display::speech_started, this);
 				t.detach();
 		});
-		_notif.function_register(event_notifier::RECORD_START, [&] (void*) { /* nothing */ });
-		_notif.function_register(event_notifier::RECORD_END, 
-			[&] (void*) { 
-				std::thread t(&display::speech_ended, this);
-				t.detach();
-		});
+		_notif.function_register(event_notifier::RECORD_END, [&] (void*) { _stop_speech = true; });
 
 		_notif.function_register(event_notifier::SPEAK_START, 
 			[&] (void*) { 
@@ -51,15 +48,26 @@ namespace sarah_matrix
 		LOG(INFO) << "display deinitialised";
 	}
 
-	void display::hotword_detected()
+	void display::speech_started()
 	{
 		_leds.On(leds::red);
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		_leds.Off();
-	}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-	void display::speech_ended()
-	{
+		matrix_hal::LedValue c;
+		
+		for (int i=0;; i++) {
+			for (int j=0; j<_leds.NumberLeds(); j++)
+			{
+				c.green = 50 * (((i + j) % 6 == 0) ? 1 : 0);
+
+				_leds.Set(j, c);
+			}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			if (_stop_speech)
+				break;
+		}
+
 		_leds.On(leds::green);
 		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 		_leds.Off();
@@ -67,30 +75,26 @@ namespace sarah_matrix
 
 	void display::speak_started()
 	{
-		matrix_hal::LedValue c;
-
-		c.blue = 50;
-		_leds.Set(c);
-
+		_leds.On(leds::blue);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-		c.blue = 0;
-		c.white = 20;
-
+		matrix_hal::LedValue c;
+		
 		for (int i=0;; i++) {
-			_leds.Set(i, c);
-			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			_leds.Off();
+			for (int j=0; j<_leds.NumberLeds(); j++)
+			{
+				c.blue = 50 * (((i + j) % 3 == 0) ? 1 : 0);
+
+				_leds.Set(j, c);
+			}
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(150));
 			if (_stop_speak)
 				break;
 		}
 
-		c.white = 0;
-		c.blue = 50;
-		_leds.Set(c);
-
+		_leds.On(leds::blue);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
 		_leds.Off();
 	}
 

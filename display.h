@@ -15,14 +15,14 @@ namespace sarah_matrix
 		void initialise();
 		void deinitialise();
 		
-		void hotword_detected();
-		void speech_ended();
+		void speech_started();
 		void speak_started();
 		
  		private:
 		event_notifier& _notif;
 		leds& _leds;
 
+		bool _stop_speech;
 		bool _stop_speak;
    };
 

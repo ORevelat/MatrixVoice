@@ -24,7 +24,6 @@ namespace sarah_matrix
 		void Set(matrix_hal::LedValue);
 		void Set(const uint, const matrix_hal::LedValue&);
 
-	private:
 		int NumberLeds() const { return 18; }
         
 	private:
