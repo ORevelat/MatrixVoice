@@ -15,6 +15,8 @@ DEFINE_string(alsaout, "", "device to use for playing");
 DEFINE_string(hotword_sensitivity, "0.54", "sensitivity to use for the hotword engine");
 DEFINE_string(hotword_model, "sarah.pmdl", "model file to use for the hotword engine");
 DEFINE_bool(frontend_algo, false, "if hotword engine must use its frontend algorithms");
+DEFINE_int32(audio_samplerate, 16000, "Audio sample rate to apply to Matrix voice, default to 16000Hz");
+DEFINE_int32(audio_gain, -1, "Audio gain to apply for matrix voice, default to -1 (use default value depending on sample rate)");
 
 #include <matrix_hal/wishbone_bus.h>
 
@@ -62,7 +64,7 @@ int main(int argc, char** argv)
 	if (!bus.SpiInit())
 		return -1;
 
-	microphones mics(bus, 16000);
+	microphones mics(bus, FLAGS_audio_samplerate, FLAGS_audio_gain);
 	leds led(bus);
 
 	// notifier to send messages between classes
