@@ -1,6 +1,5 @@
 #include <thread>
 
-#include "main.h"
 #include "recorder.h"
 
 namespace sarah_matrix
@@ -39,9 +38,11 @@ namespace sarah_matrix
 		_detector.get()->SetAudioGain(1.0);
 		_detector.get()->ApplyFrontend(FLAGS_frontend_algo);
 
+		// LOG(INFO) << " == required samplerate=" << _detector.get()->SampleRate() << " , channels=" << _detector.get()->NumChannels() << " , bitpersample=" << _detector.get()->BitsPerSample();
 		LOG(INFO) << " == using model=" << FLAGS_hotword_model << " , sensitivity=" << FLAGS_hotword_sensitivity << " , frontend=" << FLAGS_frontend_algo;
+		// LOG(INFO) << " == samplerate=" << _mics.SampleRate() << " , number of sample=" << _mics.NumberSample();
 
-		_state.reset(new record_state());
+		_state.reset(new record_state(10, _mics.NumberSample(), _mics.SampleRate()));
 
 		LOG(INFO) << "recorder initialised";
 	}
@@ -72,7 +73,7 @@ namespace sarah_matrix
 			// if playing or speech recording, do not perform hotword detection
 			if (!_isplaying && !_state.get()->is_recording())
 			{
-				int result = _detector.get()->RunDetection(_mics.last(), NUMBER_SAMPLE);
+				int result = _detector.get()->RunDetection(_mics.last(), _mics.NumberSample());
 				if (result > 0) 
 				{
 					_state.get()->start_record(avg);
@@ -85,7 +86,7 @@ namespace sarah_matrix
 			if (_state.get()->is_recording())
 			{
 				// copy to keep raw buffer
-				_state.get()->copy_to_buffer(_mics.last(), NUMBER_SAMPLE);
+				_state.get()->copy_to_buffer(_mics.last(), _mics.NumberSample());
 
 				// increment frame record counter
 				_state.get()->increment_ticks(avg);

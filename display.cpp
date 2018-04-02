@@ -37,12 +37,16 @@ namespace sarah_matrix
 	{
 		LOG(INFO) << "display initialising";
 
+		_leds.Off();
+
 		LOG(INFO) << "display initialised";
 	}
 
 	void display::deinitialise()
 	{
 		LOG(INFO) << "display deinitialising";
+		
+		_leds.Off();
 		
 		LOG(INFO) << "display deinitialised";
 	}

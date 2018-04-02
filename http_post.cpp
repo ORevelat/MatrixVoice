@@ -65,7 +65,7 @@ namespace sarah_matrix
 		std::ostringstream url;
 		url << "http://" << _url;
 
-		std::string encoded = base64_encode((char unsigned const*)& buffer.get()->_buffer[0],  buffer.get()->_len * sizeof(int16_t));
+		std::string encoded = base64_encode((char unsigned const*) buffer.get()->Buffer(),  buffer.get()->Length() * sizeof(int16_t));
 		encoded = "buffer=" + std::string(curl_easy_escape(curl , encoded.data(), encoded.size()));
 
 		struct WriteThis wt;

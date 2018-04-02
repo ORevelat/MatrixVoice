@@ -14,6 +14,10 @@ class Snowboy
 
   int RunDetection(const int16_t* data, int num_samples);
 
+  int SampleRate();
+  int NumChannels();
+  int BitsPerSample();
+
  private:
   void* detector_;
 };

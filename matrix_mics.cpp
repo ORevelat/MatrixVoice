@@ -1,17 +1,24 @@
 
 #include "matrix_mics.h"
 
+#define WINDOW_SIZE_MS		1000
+
 namespace sarah_matrix
 {
 
-	microphones::microphones(matrix_hal::WishboneBus& bus)
+	microphones::microphones(matrix_hal::WishboneBus& bus, uint16_t rate, int16_t gain)
 	{
 		_mics.Setup(&bus);
 
-		_mics.SetSamplingRate(SAMPLING_RATE);
-		_mics.SetGain(AUDIO_GAIN);
+		_mics.SetSamplingRate(rate);
+		if (gain > 0)
+			_mics.SetGain(gain);
 
-		_buffer.resize(WINDOW_SIZE_MS * (SAMPLING_RATE / 1000));
+		_samplerate = _mics.SamplingRate();
+		_gain = _mics.Gain();
+		_numbersample = _mics.NumberOfSamples();
+
+		_buffer.resize(WINDOW_SIZE_MS * (_samplerate / 1000));
 	}
 
 	// read microphone beam & store to circular buffer
@@ -19,7 +26,7 @@ namespace sarah_matrix
 	{
 		_mics.Read();
 
-		for (uint32_t s = 0; s < NUMBER_SAMPLE; s++) {
+		for (uint32_t s = 0; s < _numbersample; s++) {
 			_buffer.pushpop(_mics.Beam(s));
 		}
 	}
@@ -33,7 +40,7 @@ namespace sarah_matrix
 	// return last read buffer
 	const int16_t* microphones::last() const
 	{
-		return _buffer.lastsamples(NUMBER_SAMPLE);
+		return _buffer.lastsamples(_numbersample);
 	}
 
 }

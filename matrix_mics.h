@@ -5,27 +5,29 @@
 
 #include "circularbuffer.h"
 
-#define SAMPLING_RATE		16000
-#define NUMBER_SAMPLE		256
-#define WINDOW_SIZE_MS		256
-#define AUDIO_GAIN			1
-
 namespace sarah_matrix
 {
 
 	class microphones
 	{
 	public:
-		microphones(matrix_hal::WishboneBus&);
+		microphones(matrix_hal::WishboneBus&, uint16_t rate = 16000, int16_t gain = -1);
 
 		void read();
 		
 		const int16_t* last() const;
 		int64_t average_energy() const;
 
+		uint16_t SampleRate() const { return _samplerate; }
+		uint16_t NumberSample() const { return _numbersample; }
+
 	private:
 		matrix_hal::MicrophoneArray	_mics;
 		circularbuffer				_buffer;
+
+		uint16_t	_samplerate;
+		uint16_t	_gain;
+		uint16_t	_numbersample;
 	};
 
 }

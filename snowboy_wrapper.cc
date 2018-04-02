@@ -29,3 +29,18 @@ int Snowboy::RunDetection(const int16_t* data, int num_samples)
 {
 	return c(detector_)->RunDetection(data, num_samples);
 }
+
+int Snowboy::SampleRate()
+{
+	return c(detector_)->SampleRate();
+}
+
+int Snowboy::NumChannels()
+{
+	return c(detector_)->NumChannels();
+}
+
+int Snowboy::BitsPerSample()
+{
+	return c(detector_)->BitsPerSample();
+}

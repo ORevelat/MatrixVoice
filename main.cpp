@@ -59,9 +59,10 @@ int main(int argc, char** argv)
 
 	// hardware init
 	matrix_hal::WishboneBus bus;
-	bus.SpiInit();
+	if (!bus.SpiInit())
+		return -1;
 
-	microphones mics(bus);
+	microphones mics(bus, 16000);
 	leds led(bus);
 
 	// notifier to send messages between classes
