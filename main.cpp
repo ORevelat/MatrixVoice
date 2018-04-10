@@ -17,6 +17,7 @@ DEFINE_string(hotword_model, "sarah.pmdl", "model file to use for the hotword en
 DEFINE_bool(frontend_algo, false, "if hotword engine must use its frontend algorithms");
 DEFINE_int32(audio_samplerate, 16000, "Audio sample rate to apply to Matrix voice, default to 16000Hz");
 DEFINE_int32(audio_gain, -1, "Audio gain to apply for matrix voice, default to -1 (use default value depending on sample rate)");
+DEFINE_bool(saverecord, false, "if every speech sentence should be saved to file");
 
 #include <matrix_hal/matrixio_bus.h>
 

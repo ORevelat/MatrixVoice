@@ -110,9 +110,12 @@ namespace sarah_matrix
 			{
 				auto recorded = _state.get()->infobuffer();
 
-				std::ofstream os(newFilename(), std::ofstream::binary);
-				os.write((const char*)recorded->Buffer(), recorded->Length() * sizeof(int16_t));
-				os.close();
+				if(FLAGS_saverecord)
+				{
+					std::ofstream os(newFilename(), std::ofstream::binary);
+					os.write((const char*)recorded->Buffer(), recorded->Length() * sizeof(int16_t));
+					os.close();
+				}
 				
 				_notif.notify(event_notifier::RECORD_END, recorded);
 				_state.get()->reset();
