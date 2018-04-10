@@ -4,7 +4,7 @@
 namespace sarah_matrix
 {
 
-	leds::leds(matrix_hal::WishboneBus& bus)
+	leds::leds(matrix_hal::MatrixIOBus& bus)
 	{
 		_everloop.Setup(&bus);
 		_image1d.leds.resize(NumberLeds());

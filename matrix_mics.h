@@ -1,6 +1,6 @@
 #pragma once
 
-#include <matrix_hal/wishbone_bus.h>
+#include <matrix_hal/matrixio_bus.h>
 #include <matrix_hal/microphone_array.h>
 
 #include "circularbuffer.h"
@@ -11,7 +11,7 @@ namespace sarah_matrix
 	class microphones
 	{
 	public:
-		microphones(matrix_hal::WishboneBus&, uint16_t rate = 16000, int16_t gain = -1);
+		microphones(matrix_hal::MatrixIOBus&, uint16_t rate = 16000, int16_t gain = -1);
 
 		void read();
 		

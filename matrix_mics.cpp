@@ -6,7 +6,7 @@
 namespace sarah_matrix
 {
 
-	microphones::microphones(matrix_hal::WishboneBus& bus, uint16_t rate, int16_t gain)
+	microphones::microphones(matrix_hal::MatrixIOBus& bus, uint16_t rate, int16_t gain)
 	{
 		_mics.Setup(&bus);
 

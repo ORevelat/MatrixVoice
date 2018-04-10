@@ -1,6 +1,6 @@
 #pragma once
 
-#include <matrix_hal/wishbone_bus.h>
+#include <matrix_hal/matrixio_bus.h>
 #include <matrix_hal/everloop.h>
 namespace sarah_matrix
 {
@@ -16,7 +16,7 @@ namespace sarah_matrix
 		};
 
 	public:
-		leds(matrix_hal::WishboneBus&);
+		leds(matrix_hal::MatrixIOBus&);
 
 		void On(const color, const uint16_t intensity = 50);
 		void Off();

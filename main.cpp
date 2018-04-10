@@ -18,7 +18,7 @@ DEFINE_bool(frontend_algo, false, "if hotword engine must use its frontend algor
 DEFINE_int32(audio_samplerate, 16000, "Audio sample rate to apply to Matrix voice, default to 16000Hz");
 DEFINE_int32(audio_gain, -1, "Audio gain to apply for matrix voice, default to -1 (use default value depending on sample rate)");
 
-#include <matrix_hal/wishbone_bus.h>
+#include <matrix_hal/matrixio_bus.h>
 
 #include "event-notifier.h"
 
@@ -60,9 +60,15 @@ int main(int argc, char** argv)
 	LOG(INFO) << "Initialising ...";
 
 	// hardware init
-	matrix_hal::WishboneBus bus;
-	if (!bus.SpiInit())
+	matrix_hal::MatrixIOBus bus;
+	if (!bus.Init())
 		return -1;
+
+	if(!bus.IsDirectBus())
+	{
+		LOG(ERROR) << "Kernel Modules has been loaded. Use ALSA implementation";
+    	return -1; 
+  	}
 
 	microphones mics(bus, FLAGS_audio_samplerate, FLAGS_audio_gain);
 	leds led(bus);

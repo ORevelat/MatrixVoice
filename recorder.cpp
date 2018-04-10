@@ -1,9 +1,22 @@
 #include <thread>
+#include <fstream>
 
+#include "main.h"
 #include "recorder.h"
 
 namespace sarah_matrix
 {
+
+	inline static std::string newFilename()
+	{
+		time_t t = time(0);
+		struct tm * now = localtime( & t );
+
+		char buffer [80];
+		strftime (buffer,80,"testrecord-%Y%m%d%H%M%S.raw",now);
+
+		return std::string(buffer);
+	}
 	
 	recorder::recorder(event_notifier& n, microphones& mics)
 		: _notif(n), _mics(mics)
@@ -95,7 +108,13 @@ namespace sarah_matrix
 			// if end of speech (silence or max record time)
 			if (_state.get()->speech_ended())
 			{
-				_notif.notify(event_notifier::RECORD_END, _state.get()->infobuffer());
+				auto recorded = _state.get()->infobuffer();
+
+				std::ofstream os(newFilename(), std::ofstream::binary);
+				os.write((const char*)recorded->Buffer(), recorded->Length() * sizeof(int16_t));
+				os.close();
+				
+				_notif.notify(event_notifier::RECORD_END, recorded);
 				_state.get()->reset();
 			}
 		}
