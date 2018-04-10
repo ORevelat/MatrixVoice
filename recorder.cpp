@@ -51,9 +51,8 @@ namespace sarah_matrix
 		_detector.get()->SetAudioGain(1.0);
 		_detector.get()->ApplyFrontend(FLAGS_frontend_algo);
 
-		// LOG(INFO) << " == required samplerate=" << _detector.get()->SampleRate() << " , channels=" << _detector.get()->NumChannels() << " , bitpersample=" << _detector.get()->BitsPerSample();
 		LOG(INFO) << " == using model=" << FLAGS_hotword_model << " , sensitivity=" << FLAGS_hotword_sensitivity << " , frontend=" << FLAGS_frontend_algo;
-		// LOG(INFO) << " == samplerate=" << _mics.SampleRate() << " , number of sample=" << _mics.NumberSample();
+		LOG(INFO) << " == saverecord=" << FLAGS_saverecord;
 
 		_state.reset(new record_state(10, _mics.NumberSample(), _mics.SampleRate()));
 

@@ -14,3 +14,8 @@ DECLARE_string(alsaout);
 DECLARE_string(hotword_sensitivity);
 DECLARE_string(hotword_model);
 DECLARE_bool(frontend_algo);
+
+DECLARE_int32(audio_samplerate);
+DECLARE_int32(audio_gain);
+
+DECLARE_bool(saverecord);
