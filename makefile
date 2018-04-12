@@ -1,5 +1,4 @@
 
-RECORD = no
 DEBUG = no
 
 CC = gcc
@@ -18,12 +17,6 @@ ifeq ($(DEBUG),yes)
 else
 	CFLAGS = -W -Wall
 	CXXFLAGS = -W -Wall
-endif
-
-ifeq ($(RECORD),yes)
-	CFLAGS += -DRECORD_TOFILE=1
-	CXXFLAGS += -DRECORD_TOFILE=1
-	EXE = sarah-record
 endif
 
 all: $(EXE)
