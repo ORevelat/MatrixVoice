@@ -62,6 +62,22 @@ namespace sarah_matrix
 			res.set_content("OK", "text/plain");
 		});
 
+		svr.post(R"(/speak/)", [&](const Request& req, Response& res) {
+			if (req.has_param("input")) {
+				LOG(INFO) << " == question was: " << req.get_param_value("input");
+			}
+
+			if (req.has_param("output")) {
+				std::string text = req.get_param_value("output");
+
+				_notif.notify(event_notifier::SPEAK_RECEIVED, &text);
+				res.set_content("OK", "text/plain");
+			}
+			else {
+				res.set_content("KO", "text/plain");
+			}
+		});
+
 		LOG(INFO) << " == http_server started on " << _ip << ":" << _port << " - access to /speak/(.*)";
 
 		_http = &svr;
