@@ -11,13 +11,18 @@ LIBS = -lwiringPi -lmatrix_creator_hal -lsnowboy-detect -lcblas -lpthread -lcurl
 
 EXE = sarah
 
+FLAGS = -D_USEHIGHESTENERGY_
+
 ifeq ($(DEBUG),yes)
 	CFLAGS = -g -W -Wall
 	CXXFLAGS = -g -W -Wall
 else
-	CFLAGS = -W -Wall
-	CXXFLAGS = -W -Wall
+	CFLAGS = -W -Wall -O2
+	CXXFLAGS = -W -Wall -O2
 endif
+
+CFLAGS += $(FLAGS)
+CXXFLAGS += $(FLAGS)
 
 all: $(EXE)
 
