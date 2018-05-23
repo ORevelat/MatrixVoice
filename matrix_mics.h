@@ -2,6 +2,7 @@
 
 #include <matrix_hal/matrixio_bus.h>
 #include <matrix_hal/microphone_array.h>
+#include <matrix_hal/microphone_core.h>
 
 #include "circularbuffer.h"
 
@@ -23,6 +24,7 @@ namespace sarah_matrix
 
 	private:
 		matrix_hal::MicrophoneArray	_mics;
+		std::unique_ptr<matrix_hal::MicrophoneCore>	_miccore;
 		circularbuffer				_buffer;
 
 		uint16_t	_samplerate;

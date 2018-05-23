@@ -81,7 +81,7 @@ namespace sarah_matrix
 			_mics.read();
 
 			int64_t avg = _mics.average_energy();
-
+			
 			// if playing or speech recording, do not perform hotword detection
 			if (!_isplaying && !_state.get()->is_recording())
 			{

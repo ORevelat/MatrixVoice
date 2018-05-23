@@ -1,5 +1,6 @@
 
 #include "matrix_mics.h"
+#include "matrix_mics.bandpass_coeff.h"
 
 #define WINDOW_SIZE_MS		1000
 
@@ -17,6 +18,12 @@ namespace sarah_matrix
 		_samplerate = _mics.SamplingRate();
 		_gain = _mics.Gain();
 		_numbersample = _mics.NumberOfSamples();
+
+		_miccore.reset(new matrix_hal::MicrophoneCore(_mics));
+		_miccore.get()->Setup(&bus);
+		_miccore.get()->SelectFIRCoeff(&FIR_bandpass[0]);
+
+		_mics.CalculateDelays(0, 0, 100.0, 320 * 1000.0);
 
 		_buffer.resize(WINDOW_SIZE_MS * (_samplerate / 1000));
 	}
